@@ -393,8 +393,77 @@ async function copyText(text) {
   return copied;
 }
 
+function selectShareCopyText(area) {
+  area.focus();
+  area.select();
+  area.setSelectionRange(0, area.value.length);
+}
+
 function showManualShareLink(label, shareUrl) {
-  window.prompt(`${label}をコピーしてください。`, shareUrl);
+  if (!document.body) {
+    window.prompt(`${label}をコピーしてください。`, shareUrl);
+    return;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'share-copy-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+
+  const dialog = document.createElement('div');
+  dialog.className = 'share-copy-dialog';
+
+  const title = document.createElement('h2');
+  title.textContent = `${label}をコピー`;
+
+  const hint = document.createElement('p');
+  hint.textContent = 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
+
+  const area = document.createElement('textarea');
+  area.className = 'share-copy-text';
+  area.value = shareUrl;
+  area.readOnly = true;
+  area.setAttribute('aria-label', label);
+
+  const actions = document.createElement('div');
+  actions.className = 'share-copy-actions';
+
+  const closeButton = document.createElement('button');
+  closeButton.className = 'wide-button';
+  closeButton.type = 'button';
+  closeButton.textContent = 'Close';
+
+  const copyButton = document.createElement('button');
+  copyButton.className = 'wide-button primary';
+  copyButton.type = 'button';
+  copyButton.textContent = 'Copy';
+
+  const close = () => overlay.remove();
+
+  closeButton.addEventListener('click', close);
+  copyButton.addEventListener('click', async () => {
+    if (await copyText(shareUrl)) {
+      setStatus(`${label} Copied (${shareUrl.length})`);
+      close();
+      return;
+    }
+    selectShareCopyText(area);
+    setStatus(`${label} Ready (${shareUrl.length})`);
+  });
+  area.addEventListener('focus', () => selectShareCopyText(area));
+  area.addEventListener('click', () => selectShareCopyText(area));
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) close();
+  });
+  overlay.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') close();
+  });
+
+  actions.append(closeButton, copyButton);
+  dialog.append(title, hint, area, actions);
+  overlay.append(dialog);
+  document.body.append(overlay);
+  window.requestAnimationFrame(() => selectShareCopyText(area));
 }
 
 function confirmLongShareCopy(label, shareUrl) {

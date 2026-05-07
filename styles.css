@@ -3061,6 +3061,74 @@ body.is-focus-mode .mobile-full-button .tool-icon {
   }
 }
 
+.share-copy-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .28);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(14px) saturate(1.1);
+}
+
+.share-copy-dialog {
+  width: min(560px, 100%);
+  padding: 18px;
+  border: 1px solid rgba(124, 136, 155, .28);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 24px 72px rgba(15, 23, 42, .22), inset 0 1px 0 rgba(255, 255, 255, .82);
+}
+
+.share-copy-dialog h2 {
+  margin: 0 0 8px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.share-copy-dialog p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.share-copy-text {
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid rgba(124, 136, 155, .34);
+  border-radius: 12px;
+  background: rgba(248, 250, 253, .92);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.share-copy-text:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(10, 132, 255, .14);
+}
+
+.share-copy-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.share-copy-actions .wide-button {
+  flex: 0 0 auto;
+  min-width: 92px;
+}
+
 @media print {
   @page {
     size: landscape;
