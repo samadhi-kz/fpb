@@ -257,12 +257,6 @@ function base64UrlToBytes(value) {
   return bytes;
 }
 
-async function gzipText(text) {
-  if (!window.CompressionStream) return null;
-  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-
 async function gunzipText(bytes) {
   if (!window.DecompressionStream) throw new Error('Compressed links are not supported in this browser');
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
@@ -292,14 +286,8 @@ function playbookForCurrentPlayLink() {
   };
 }
 
-async function encodePlaySharePayload(payload) {
+function encodePlaySharePayload(payload) {
   const text = JSON.stringify(payload);
-  try {
-    const gzipBytes = await gzipText(text);
-    if (gzipBytes) return `${PLAY_SHARE_PREFIX_GZIP}${bytesToBase64Url(gzipBytes)}`;
-  } catch (error) {
-    console.warn('Play link compression failed; using raw payload.', error);
-  }
   return `${PLAY_SHARE_PREFIX_RAW}${bytesToBase64Url(new TextEncoder().encode(text))}`;
 }
 
@@ -328,29 +316,46 @@ function shouldUseNativeLinkShare() {
 
 async function copyText(text) {
   if (navigator.clipboard?.writeText && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return true;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      console.warn('Clipboard API copy failed; trying legacy copy.', error);
+    }
   }
 
   const area = document.createElement('textarea');
   area.value = text;
   area.setAttribute('readonly', '');
   area.style.position = 'fixed';
-  area.style.left = '-9999px';
+  area.style.left = '0';
   area.style.top = '0';
+  area.style.width = '1px';
+  area.style.height = '1px';
+  area.style.opacity = '0';
   document.body.append(area);
+  area.focus();
   area.select();
-  const copied = document.execCommand('copy');
+  area.setSelectionRange(0, area.value.length);
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch (error) {
+    console.warn('Legacy clipboard copy failed.', error);
+  }
   area.remove();
-  if (!copied) throw new Error('Clipboard copy failed');
-  return true;
+  return copied;
+}
+
+function showManualPlayLink(shareUrl) {
+  window.prompt('Play Linkをコピーしてください。', shareUrl);
 }
 
 async function shareCurrentPlayLink() {
   saveLocal(false);
   try {
     const playbook = playbookForCurrentPlayLink();
-    const token = await encodePlaySharePayload(playbook);
+    const token = encodePlaySharePayload(playbook);
     const shareUrl = `${currentPageUrlWithoutHash()}#${PLAY_SHARE_HASH_KEY}=${token}`;
     const playName = playbook.folders[0]?.plays[0]?.name || 'Flag Play Board';
 
@@ -364,11 +369,17 @@ async function shareCurrentPlayLink() {
           setStatus('Cancelled');
           return;
         }
+        console.warn('Native share failed; trying clipboard copy.', error);
       }
     }
 
-    await copyText(shareUrl);
-    setStatus(`Play Link Copied (${shareUrl.length})`);
+    if (await copyText(shareUrl)) {
+      setStatus(`Play Link Copied (${shareUrl.length})`);
+      return;
+    }
+
+    showManualPlayLink(shareUrl);
+    setStatus(`Play Link Ready (${shareUrl.length})`);
   } catch (error) {
     console.error(error);
     alert('Play Linkを作成できませんでした。JSON保存を使ってください。');
