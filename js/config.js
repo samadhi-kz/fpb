@@ -297,6 +297,8 @@ const state = {
   suppressTreeClick: false,
   mobileBookDrag: null,
   suppressMobileBookClick: false,
+  previewDrag: null,
+  suppressPreviewClick: false,
   pendingPreset: null,
   printCleanup: null,
   undoStack: [],
@@ -322,6 +324,7 @@ const layers = {
 
 const controls = {
   playbookTree: document.querySelector('#playbookTree'),
+  playbookPreview: document.querySelector('#playbookPreview'),
   playNotes: document.querySelector('#playNotes'),
   selectedText: document.querySelector('#selectedText'),
   selectionBadge: document.querySelector('#selectionBadge'),
