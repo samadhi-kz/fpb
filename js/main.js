@@ -174,6 +174,9 @@ function bindTouchFriendlyCommand(selector, handler) {
 
 bindTouchFriendlyCommand('[data-action="undo-history"]', undoCommand);
 bindTouchFriendlyCommand('[data-action="redo-history"]', redoCommand);
+bindTouchFriendlyCommand('[data-action="focus-zoom-out"]', focusZoomOut);
+bindTouchFriendlyCommand('[data-action="focus-zoom-reset"]', resetFocusZoom);
+bindTouchFriendlyCommand('[data-action="focus-zoom-in"]', focusZoomIn);
 bindTouchFriendlyCommand('[data-action="clear-routes"]', clearRoutes);
 bindTouchFriendlyCommand('[data-action="reset-play-diagram"]', resetPlayDiagram);
 bindTouchFriendlyCommand('[data-action="set-qb-setback"]', () => setQbDepth(2, 'Setback'));
@@ -408,6 +411,23 @@ document.addEventListener('keydown', (event) => {
     }
     return;
   }
+  if (isFocusMode() && !isTextEditing) {
+    if (event.key === '+' || event.key === '=') {
+      event.preventDefault();
+      focusZoomIn();
+      return;
+    }
+    if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      focusZoomOut();
+      return;
+    }
+    if (event.key === '0') {
+      event.preventDefault();
+      resetFocusZoom();
+      return;
+    }
+  }
   if (state.routeDraft?.input === 'poly' && !isTextEditing) {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -472,6 +492,7 @@ let focusBaseFieldWidth = 0;
 let focusBaseFieldHeight = 0;
 const FOCUS_ZOOM_MIN = 0.72;
 const FOCUS_ZOOM_MAX = 2.8;
+const FOCUS_ZOOM_STEP = 1.18;
 
 window.addEventListener('fullscreenchange', () => {
   syncFullscreenButtons();
@@ -507,6 +528,33 @@ function syncFullscreenButtons() {
   });
   syncFocusDockMinimizeButton();
   syncMobileCornerMinimizeButton();
+  syncFocusZoomButtons();
+}
+
+function focusZoomPercent() {
+  return `${Math.round(focusZoom * 100)}%`;
+}
+
+function syncFocusZoomButtons() {
+  const active = isFocusMode();
+  const canZoomOut = active && focusZoom > FOCUS_ZOOM_MIN + 0.01;
+  const canZoomIn = active && focusZoom < FOCUS_ZOOM_MAX - 0.01;
+  document.querySelectorAll('[data-action="focus-zoom-out"]').forEach((button) => {
+    button.disabled = !canZoomOut;
+    button.title = active ? 'Zoom out' : 'Use Fullscreen to zoom';
+  });
+  document.querySelectorAll('[data-action="focus-zoom-in"]').forEach((button) => {
+    button.disabled = !canZoomIn;
+    button.title = active ? 'Zoom in' : 'Use Fullscreen to zoom';
+  });
+  document.querySelectorAll('[data-action="focus-zoom-reset"]').forEach((button) => {
+    button.disabled = !active;
+    button.title = active ? 'Reset zoom' : 'Use Fullscreen to zoom';
+    const icon = button.querySelector('.tool-icon');
+    const label = button.querySelector('span:last-child');
+    if (icon) icon.textContent = focusZoomPercent();
+    if (label && label !== icon) label.textContent = 'Zoom';
+  });
 }
 
 function syncFocusDockMinimizeButton() {
@@ -684,6 +732,33 @@ function setFocusZoom(nextZoom, centerClientX = window.innerWidth / 2, centerCli
   const nextHeight = field.getBoundingClientRect().height || focusBaseFieldHeight || 1;
   wrap.scrollLeft = fieldLeft + ratioX * nextWidth - (centerClientX - wrapRect.left);
   wrap.scrollTop = fieldTop + ratioY * nextHeight - (centerClientY - wrapRect.top);
+  syncFocusZoomButtons();
+}
+
+function changeFocusZoom(multiplier, centerClientX = window.innerWidth / 2, centerClientY = window.innerHeight / 2) {
+  if (!isFocusMode()) {
+    setStatus('Fullscreen first');
+    return;
+  }
+  setFocusZoom(focusZoom * multiplier, centerClientX, centerClientY);
+  setStatus(`Zoom ${focusZoomPercent()}`);
+}
+
+function focusZoomIn(button, event) {
+  changeFocusZoom(FOCUS_ZOOM_STEP, event?.clientX || window.innerWidth / 2, event?.clientY || window.innerHeight / 2);
+}
+
+function focusZoomOut(button, event) {
+  changeFocusZoom(1 / FOCUS_ZOOM_STEP, event?.clientX || window.innerWidth / 2, event?.clientY || window.innerHeight / 2);
+}
+
+function resetFocusZoom(button, event) {
+  if (!isFocusMode()) {
+    setStatus('Fullscreen first');
+    return;
+  }
+  setFocusZoom(1, event?.clientX || window.innerWidth / 2, event?.clientY || window.innerHeight / 2);
+  setStatus('Zoom 100%');
 }
 
 function clearFocusFieldSize() {
@@ -692,6 +767,7 @@ function clearFocusFieldSize() {
   focusBaseFieldHeight = 0;
   field.style.removeProperty('--focus-field-width');
   field.style.removeProperty('--focus-field-height');
+  syncFocusZoomButtons();
 }
 
 function centerFocusCanvas() {
@@ -783,6 +859,15 @@ function updateFocusPinch(event) {
   setFocusZoom(focusPinch.startZoom * (distance / focusPinch.startDistance), center.x, center.y);
 }
 
+function handleFocusWheelZoom(event) {
+  if (!isFocusMode() || (!event.ctrlKey && !event.metaKey)) return;
+  if (event.target.closest('.mobile-dock, .mobile-corner-actions')) return;
+  event.preventDefault();
+  const multiplier = Math.exp(-event.deltaY * 0.002);
+  setFocusZoom(focusZoom * multiplier, event.clientX, event.clientY);
+  setStatus(`Zoom ${focusZoomPercent()}`);
+}
+
 function handleFocusZoomPointerDown(event) {
   if (!isFocusMode() || event.pointerType !== 'touch') return;
   if (event.target.closest('.mobile-dock, .mobile-corner-actions')) return;
@@ -810,6 +895,7 @@ function finishFocusZoomPointer(event) {
 }
 
 document.querySelector('.canvas-wrap')?.addEventListener('pointerdown', handleFocusZoomPointerDown, { capture: true });
+document.querySelector('.canvas-wrap')?.addEventListener('wheel', handleFocusWheelZoom, { passive: false });
 document.addEventListener('pointermove', handleFocusZoomPointerMove, { passive: false });
 document.addEventListener('pointerup', finishFocusZoomPointer);
 document.addEventListener('pointercancel', finishFocusZoomPointer);

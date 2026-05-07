@@ -3046,6 +3046,23 @@ body.is-focus-mode .mobile-full-button .tool-icon {
     color: var(--accent-dark);
   }
 
+  .mobile-zoom-button,
+  body.is-focus-mode .mobile-zoom-button {
+    flex-basis: 70px;
+  }
+
+  .mobile-zoom-reset-button,
+  body.is-focus-mode .mobile-zoom-reset-button {
+    flex-basis: 82px;
+  }
+
+  .mobile-zoom-reset-button .tool-icon,
+  body.is-focus-mode .mobile-zoom-reset-button .tool-icon {
+    width: 42px;
+    flex-basis: 42px;
+    font-size: 11px;
+  }
+
   .mobile-action-row .mobile-full-button,
   body.is-focus-mode .mobile-action-row .mobile-full-button {
     border-color: var(--accent);
