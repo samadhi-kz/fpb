@@ -1,16 +1,24 @@
 :root {
   color-scheme: light;
-  --ink: #16181d;
-  --muted: #626b76;
-  --line: #d9dee5;
-  --paper: #f7f8fa;
-  --panel: #ffffff;
+  --ink: #111827;
+  --muted: #687386;
+  --line: rgba(124, 136, 155, .26);
+  --paper: #eef3f8;
+  --panel: rgba(255, 255, 255, .78);
+  --panel-solid: #ffffff;
+  --control: rgba(255, 255, 255, .74);
+  --control-hover: rgba(255, 255, 255, .92);
+  --accent: #0a84ff;
+  --accent-dark: #0067d8;
+  --accent-soft: rgba(10, 132, 255, .12);
   --teal: #008579;
   --teal-dark: #00685f;
   --red: #e71932;
   --gold: #f3b43f;
-  --blue: #2f6fed;
-  --shadow: 0 18px 46px rgba(20, 30, 45, .12);
+  --blue: #0a84ff;
+  --shadow: 0 24px 60px rgba(30, 42, 60, .14);
+  --panel-shadow: 0 12px 34px rgba(30, 42, 60, .1), inset 0 1px 0 rgba(255, 255, 255, .82);
+  --control-shadow: 0 1px 2px rgba(30, 42, 60, .08), inset 0 1px 0 rgba(255, 255, 255, .68);
   --mobile-dock-space: 164px;
 }
 
@@ -21,9 +29,13 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--paper);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, 0) 220px),
+    var(--paper);
   color: var(--ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", Inter, ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -46,6 +58,7 @@ button[aria-disabled="true"] {
 button {
   line-height: 1.15;
   touch-action: manipulation;
+  transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease, transform .16s ease;
 }
 
 button:focus-visible,
@@ -71,8 +84,11 @@ select:focus-visible,
   overflow-y: auto;
   scrollbar-gutter: stable;
   padding: 18px;
-  border-right: 1px solid var(--line);
-  background: #fff;
+  border-right: 1px solid rgba(124, 136, 155, .22);
+  background: rgba(248, 250, 253, .78);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, .7);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
+  backdrop-filter: blur(22px) saturate(1.22);
 }
 
 .brand,
@@ -103,10 +119,13 @@ select:focus-visible,
 
 .brand h1 {
   font-size: 27px;
+  font-weight: 860;
+  letter-spacing: 0;
 }
 
 .topbar h2 {
   font-size: 28px;
+  font-weight: 860;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -127,6 +146,9 @@ select:focus-visible,
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
+  box-shadow: var(--panel-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
+  backdrop-filter: blur(18px) saturate(1.16);
 }
 
 .panel-title,
@@ -142,10 +164,11 @@ select:focus-visible,
 select {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 8px;
+  background: var(--control);
   color: var(--ink);
   padding: 8px 10px;
+  box-shadow: var(--control-shadow);
 }
 
 .text-input,
@@ -162,7 +185,7 @@ select {
 }
 
 .text-area:disabled {
-  background: #f2f4f7;
+  background: rgba(236, 240, 246, .76);
   color: #8a929d;
 }
 
@@ -171,17 +194,22 @@ select {
 .dock-action-button,
 .wide-button {
   border: 1px solid var(--line);
-  border-radius: 7px;
-  background: #fff;
+  border-radius: 8px;
+  background: var(--control);
   color: var(--ink);
   cursor: pointer;
   font-weight: 800;
+  box-shadow: var(--control-shadow);
 }
 
 .icon-button {
   width: 40px;
   height: 40px;
+  border-color: rgba(10, 132, 255, .24);
+  background: rgba(255, 255, 255, .72);
+  color: var(--accent-dark);
   font-size: 24px;
+  box-shadow: 0 8px 20px rgba(10, 132, 255, .11), inset 0 1px 0 rgba(255, 255, 255, .82);
 }
 
 .segmented {
@@ -218,8 +246,8 @@ select {
   height: 26px;
   flex: 0 0 26px;
   place-items: center;
-  border-radius: 6px;
-  background: #eef1f4;
+  border-radius: 7px;
+  background: rgba(231, 236, 244, .88);
   font-size: 16px;
   line-height: 1;
 }
@@ -240,31 +268,34 @@ select {
 .preset-button {
   min-height: 34px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 8px;
+  background: var(--control);
   color: var(--ink);
   cursor: pointer;
   font-size: 12px;
   font-weight: 850;
+  box-shadow: var(--control-shadow);
 }
 
 .formation-button:hover,
 .preset-button:hover {
-  border-color: #a9b3bf;
+  border-color: rgba(10, 132, 255, .34);
+  background: var(--control-hover);
 }
 
 .preset-button.is-pending {
   border-color: var(--blue);
-  background: #edf4ff;
-  color: #174ea6;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
 }
 
 .tool-button.is-active,
 .line-type-button.is-active,
 .wide-button.primary {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: var(--accent);
+  background: var(--accent);
   color: #fff;
+  box-shadow: 0 10px 22px rgba(10, 132, 255, .2), inset 0 1px 0 rgba(255, 255, 255, .22);
 }
 
 .tool-button.is-active .tool-icon {
@@ -280,11 +311,13 @@ select {
 .icon-button:hover,
 .tool-button:hover,
 .dock-action-button:hover {
-  border-color: #a9b3bf;
+  border-color: rgba(10, 132, 255, .34);
+  background: var(--control-hover);
+  transform: translateY(-1px);
 }
 
 .danger {
-  color: #b20c22;
+  color: #d31b34;
 }
 
 .playbook-panel {
@@ -296,8 +329,9 @@ select {
   overflow-y: auto;
   padding: 4px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fbfcfd;
+  border-radius: 8px;
+  background: rgba(248, 250, 253, .62);
+  box-shadow: inset 0 1px 3px rgba(30, 42, 60, .05);
 }
 
 .tree-folder + .tree-folder {
@@ -316,16 +350,16 @@ select {
 
 .tree-row:hover,
 .tree-row:focus-within {
-  background: #eef2f5;
+  background: rgba(10, 132, 255, .08);
 }
 
 .tree-row.is-active {
-  background: #dfeeed;
-  color: #004f48;
+  background: rgba(10, 132, 255, .14);
+  color: #004f9f;
 }
 
 .tree-row.is-folder-active:not(.is-active) {
-  background: #f1f6f6;
+  background: rgba(0, 133, 121, .08);
 }
 
 .tree-row[draggable="true"] .tree-label,
@@ -359,7 +393,7 @@ select {
 .tree-row.is-drop-into {
   outline: 2px solid var(--blue);
   outline-offset: 1px;
-  background: #edf4ff;
+  background: var(--accent-soft);
 }
 
 .tree-toggle,
@@ -451,7 +485,7 @@ select {
 }
 
 .tree-action:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, .82);
   color: var(--ink);
 }
 
@@ -504,7 +538,7 @@ select {
 .check-row input {
   width: 18px;
   height: 18px;
-  accent-color: var(--teal);
+  accent-color: var(--accent);
 }
 
 .range-row {
@@ -519,7 +553,7 @@ select {
 
 .range-row input {
   width: 100%;
-  accent-color: var(--teal);
+  accent-color: var(--accent);
 }
 
 .range-row output {
@@ -542,8 +576,9 @@ select {
   height: 34px;
   padding: 2px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fff;
+  border-radius: 8px;
+  background: var(--control);
+  box-shadow: var(--control-shadow);
 }
 
 .selection-badge {
@@ -552,11 +587,12 @@ select {
   align-items: center;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #f7f8fa;
+  border-radius: 8px;
+  background: rgba(248, 250, 253, .72);
   color: var(--ink);
   font-size: 13px;
   font-weight: 800;
+  box-shadow: inset 0 1px 2px rgba(30, 42, 60, .05);
 }
 
 .book-note-label {
@@ -607,13 +643,14 @@ select {
   overflow: hidden;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #f7f8fa;
+  border-radius: 8px;
+  background: rgba(248, 250, 253, .72);
   color: var(--ink);
   font-size: 13px;
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
+  box-shadow: inset 0 1px 2px rgba(30, 42, 60, .05);
 }
 
 .file-hint {
@@ -706,6 +743,7 @@ select {
 
 .topbar {
   min-height: 58px;
+  padding: 0 2px;
 }
 
 .title-group {
@@ -717,21 +755,21 @@ select {
 
 .folder-label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
 .editable-title {
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .editable-title:hover {
-  color: var(--teal-dark);
+  color: var(--accent-dark);
 }
 
 .topbar-actions {
@@ -743,18 +781,19 @@ select {
 .topbar-button {
   min-height: 36px;
   padding: 7px 12px;
-  border: 1px solid var(--teal);
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  background: var(--teal);
+  background: var(--accent);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
   font-weight: 850;
+  box-shadow: 0 10px 24px rgba(10, 132, 255, .22), inset 0 1px 0 rgba(255, 255, 255, .24);
 }
 
 .topbar-button:hover {
-  border-color: var(--teal-dark);
-  background: var(--teal-dark);
+  border-color: var(--accent-dark);
+  background: var(--accent-dark);
 }
 
 .status {
@@ -762,11 +801,14 @@ select {
   padding: 8px 12px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: #fff;
+  background: rgba(255, 255, 255, .76);
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
   text-align: center;
+  box-shadow: var(--control-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  backdrop-filter: blur(14px) saturate(1.12);
 }
 
 .canvas-wrap {
@@ -780,10 +822,10 @@ select {
   height: auto;
   max-height: calc(100vh - 130px);
   aspect-ratio: 1000 / 720;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(124, 136, 155, .22);
   border-radius: 8px;
   background: #fff;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, .88);
   touch-action: none;
   user-select: none;
 }
@@ -842,7 +884,7 @@ body.is-focus-mode .workspace {
   grid-template-rows: minmax(0, 1fr);
   padding: 0;
   border: 0;
-  background: #f7f8fa;
+  background: var(--paper);
   box-shadow: none;
 }
 
@@ -2878,6 +2920,143 @@ body.is-focus-mode .mobile-full-button .tool-icon {
 
   .brand h1 {
     font-size: 20px;
+  }
+}
+
+/* Apple-style polish layered after the responsive rules. */
+.panel-title,
+.field-label,
+.line-type-control > span {
+  letter-spacing: 0;
+}
+
+.formation-button.is-active,
+.dock-action-button.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.wide-button.danger,
+.dock-action-button.danger {
+  border-color: rgba(211, 27, 52, .2);
+  background: rgba(255, 255, 255, .7);
+}
+
+.wide-button.danger:hover,
+.dock-action-button.danger:hover {
+  border-color: rgba(211, 27, 52, .34);
+  background: rgba(255, 242, 244, .86);
+}
+
+.file-badge,
+.selection-badge,
+.status {
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
+  backdrop-filter: blur(12px) saturate(1.08);
+}
+
+@media (max-width: 860px), (hover: none) and (pointer: coarse) and (max-width: 1366px) {
+  .workspace {
+    background: rgba(248, 250, 253, .82);
+    box-shadow: 0 10px 30px rgba(30, 42, 60, .12), inset 0 -1px 0 rgba(255, 255, 255, .72);
+    -webkit-backdrop-filter: blur(18px) saturate(1.18);
+    backdrop-filter: blur(18px) saturate(1.18);
+  }
+
+  .mobile-corner-actions,
+  .mobile-dock,
+  body.is-focus-mode .mobile-corner-actions,
+  body.is-focus-mode .mobile-dock {
+    border-color: rgba(124, 136, 155, .24);
+    background: rgba(248, 250, 253, .78);
+    box-shadow: 0 18px 44px rgba(30, 42, 60, .18), inset 0 1px 0 rgba(255, 255, 255, .84);
+    -webkit-backdrop-filter: blur(22px) saturate(1.22);
+    backdrop-filter: blur(22px) saturate(1.22);
+  }
+
+  .mobile-corner-button,
+  .mobile-dock .tool-button,
+  .mobile-dock .dock-action-button,
+  .mobile-book-add-button,
+  .mobile-book-folder-button,
+  .mobile-book-play-button,
+  .mobile-book-control-button,
+  body.is-focus-mode .mobile-corner-button,
+  body.is-focus-mode .mobile-dock .tool-button,
+  body.is-focus-mode .mobile-dock .dock-action-button,
+  body.is-focus-mode .mobile-book-add-button,
+  body.is-focus-mode .mobile-book-folder-button,
+  body.is-focus-mode .mobile-book-play-button,
+  body.is-focus-mode .mobile-book-control-button {
+    border-color: rgba(124, 136, 155, .24);
+    background: rgba(255, 255, 255, .7);
+    box-shadow: var(--control-shadow);
+  }
+
+  .mobile-corner-button.is-active,
+  .mobile-dock .tool-button.is-active,
+  .mobile-panel-button.is-active,
+  .mobile-line-style-button.is-active,
+  .mobile-player-mark-button.is-active,
+  .mobile-full-button,
+  .mobile-book-add-button,
+  body.is-focus-mode .mobile-corner-button.is-active,
+  body.is-focus-mode .mobile-dock .tool-button.is-active,
+  body.is-focus-mode .mobile-panel-button.is-active,
+  body.is-focus-mode .mobile-line-style-button.is-active,
+  body.is-focus-mode .mobile-player-mark-button.is-active,
+  body.is-focus-mode .mobile-full-button,
+  body.is-focus-mode .mobile-book-add-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(10, 132, 255, .24), inset 0 1px 0 rgba(255, 255, 255, .24);
+  }
+
+  .mobile-corner-button.is-active .tool-icon,
+  .mobile-dock .tool-button.is-active .tool-icon,
+  .mobile-panel-button.is-active .tool-icon,
+  .mobile-full-button .tool-icon,
+  body.is-focus-mode .mobile-corner-button.is-active .tool-icon,
+  body.is-focus-mode .mobile-dock .tool-button.is-active .tool-icon,
+  body.is-focus-mode .mobile-panel-button.is-active .tool-icon,
+  body.is-focus-mode .mobile-full-button .tool-icon {
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
+  }
+
+  .mobile-file-badge,
+  .mobile-corner-minimize,
+  .mobile-dock-minimize,
+  .mobile-row-label,
+  body.is-focus-mode .mobile-file-badge,
+  body.is-focus-mode .mobile-corner-minimize,
+  body.is-focus-mode .mobile-dock-minimize,
+  body.is-focus-mode .mobile-row-label {
+    border-color: rgba(124, 136, 155, .2);
+    background: rgba(255, 255, 255, .68);
+    color: var(--muted);
+  }
+
+  .mobile-book-load-button,
+  body.is-focus-mode .mobile-book-load-button {
+    border-color: rgba(10, 132, 255, .24);
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+  }
+
+  .mobile-action-row .mobile-full-button,
+  body.is-focus-mode .mobile-action-row .mobile-full-button {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .mobile-action-row .mobile-full-button .tool-icon,
+  body.is-focus-mode .mobile-action-row .mobile-full-button .tool-icon {
+    background: rgba(255, 255, 255, .22);
+    color: #fff;
   }
 }
 
