@@ -6,7 +6,7 @@ An interactive web-based tool for designing and visualizing flag football plays.
 
 - Draw and edit football plays with routes, motions, passes, and blocks
 - Switch offense formations in one click: Single back, Spread, Twins, Twins stack, Trips, Bunch, Tight, Double back, and I formation
-- Keep fixed offensive roles: 1 Center/Screen, 2 QB, 3 RB/WR, 4 Blocker/WR/Screen, 5 WR
+- Keep fixed offensive roles: 1 Center/Screen, 2 QB, 3 RB/WR / blocker / screen, 4 RB/WR / blocker / screen, 5 RB/WR / blocker / screen
 - Show or hide the defense markers while keeping their positions saved
 - Customize player markers (light blue circles, red stars, yellow diamonds, green squares)
 - Adjust player size and end cap size
@@ -46,11 +46,11 @@ An interactive web-based tool for designing and visualizing flag football plays.
 
 - `1`: Center / screen receiver
 - `2`: QB
-- `3`: RB/WR
-- `4`: Blocker/WR / screen receiver
-- `5`: WR
+- `3`: RB/WR / blocker / screen
+- `4`: RB/WR / blocker / screen
+- `5`: RB/WR / blocker / screen
 
-Formation presets follow these roles. `1` stays at center but can be used as a screen receiver, `2` stays behind as QB, `3` is used as the RB/slot-flex player, `4` is kept more inside as the blocker/inside WR and can also receive screens, and `5` is treated as the outside WR. Use `Flip H` to mirror the same concept to the other side.
+Formation presets follow these roles. `1` stays at center but can be used as a screen receiver, `2` stays behind as QB, and `3`, `4`, `5` are treated as multi-role back/receiver/block-screen players with occasional throw options. Use `Flip H` to mirror the same concept to the other side.
 
 ## File Format
 
@@ -143,7 +143,7 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 `index.html` をブラウザで開くと動きます。
 
 - 選択ツールで選手や守備Xをドラッグ
-- 役割は 1 Center-Screen / 2 QB / 3 RB-WR / 4 Blocker-WR-Screen / 5 WR
+- 役割は 1 Center-Screen / 2 QB / 3 RB-WR / blocker / screen / 4 RB-WR / blocker / screen / 5 RB-WR / blocker / screen
 - Offense Formation で Single back / Spread / Twins / Twins stack / Trips / Bunch / Tight / Double back / I formation を一発配置
 - 反対側の形は Flip H で左右反転
 - Defense で守備マーカーの表示・非表示を切り替え
