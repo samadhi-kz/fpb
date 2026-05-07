@@ -293,6 +293,7 @@ function applyDefenseFormation(value) {
   state.routeDraft = null;
   state.drag = null;
   state.pendingPreset = null;
+  state.defenseFormation = value;
   state.defenseVisible = true;
   if (formation.match === 'man') {
     applyManDefenseFormation(formation);

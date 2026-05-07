@@ -790,6 +790,12 @@ function syncDefenseVisibilityControls() {
   });
 }
 
+function syncDefenseFormationButtons() {
+  document.querySelectorAll('[data-defense-formation]').forEach((button) => {
+    button.classList.toggle('is-active', button.dataset.defenseFormation === state.defenseFormation);
+  });
+}
+
 function syncSelectionControls() {
   const selectedNote = state.selectedType === 'annotation'
     ? state.annotations.find((note) => note.id === state.selectedId)
@@ -818,6 +824,7 @@ function render() {
   syncEndCapSizeControl();
   syncLineStyleControls();
   syncRouteShapeControl();
+  syncDefenseFormationButtons();
   
   // Update arrow marker size
   const marker = field.querySelector('#routeArrow');

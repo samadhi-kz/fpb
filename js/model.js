@@ -160,6 +160,7 @@ function currentPlaySnapshot() {
     playerSize: state.playerSize,
     endCapSize: state.endCapSize,
     defenseVisible: state.defenseVisible,
+    defenseFormation: state.defenseFormation,
     sourceImage: state.sourceImage || '',
     routeMode: normalizeRouteMode(state.routeMode),
     routeStyle: normalizeRouteStyle(state.routeStyle),
@@ -185,6 +186,7 @@ function normalizePlay(play) {
     playerSize: normalizePlayerSize(play.playerSize ?? fallback.playerSize),
     endCapSize: normalizeEndCapSize(play.endCapSize ?? fallback.endCapSize),
     defenseVisible: play.defenseVisible === false ? false : fallback.defenseVisible,
+    defenseFormation: play.defenseFormation || fallback.defenseFormation,
     sourceImage,
     routeMode: normalizeRouteMode(play.routeMode || fallback.routeMode),
     routeStyle: normalizeRouteStyle(play.routeStyle || fallback.routeStyle),
@@ -518,6 +520,7 @@ function applyPlay(play) {
   state.playerSize = normalizePlayerSize(normalized.playerSize);
   state.endCapSize = normalizeEndCapSize(normalized.endCapSize);
   state.defenseVisible = Boolean(normalized.defenseVisible);
+  state.defenseFormation = normalized.defenseFormation;
   state.sourceImage = normalized.sourceImage || '';
   state.routeMode = normalizeRouteMode(normalized.routeMode);
   state.routeStyle = normalizeRouteStyle(normalized.routeStyle);
@@ -546,6 +549,7 @@ function clearActivePlayView(label = 'No Play Selected') {
   state.playerSize = PLAYER_SIZE.default;
   state.endCapSize = END_CAP_SIZE.default;
   state.defenseVisible = defaultPlay.defenseVisible;
+  state.defenseFormation = defaultPlay.defenseFormation;
   state.sourceImage = '';
   state.routeMode = 'straight';
   state.routeStyle = cloneData(defaultPlay.routeStyle);

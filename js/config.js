@@ -240,6 +240,7 @@ const defaultPlay = {
   playerSize: PLAYER_SIZE.default,
   endCapSize: END_CAP_SIZE.default,
   defenseVisible: true,
+  defenseFormation: 'normal',
   sourceImage: '',
   routeMode: 'straight',
   routeStyle: {
@@ -280,6 +281,7 @@ const state = {
   players: [],
   defenders: [],
   defenseVisible: true,
+  defenseFormation: 'normal',
   sourceImage: '',
   routes: [],
   annotations: [],
