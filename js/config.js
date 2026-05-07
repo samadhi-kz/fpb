@@ -256,11 +256,11 @@ const defaultPlay = {
     { id: 'p5', label: '5', x: fieldX(20), y: fieldY(0), role: 'skill' }
   ],
   defenders: [
-    { id: 'd1', label: 'X', x: fieldX(5), y: fieldY(-5) },
+    { id: 'd1', label: 'X', x: fieldX(5), y: fieldY(-7) },
     { id: 'd2', label: 'X', x: fieldX(10), y: fieldY(-5) },
     { id: 'd3', label: 'X', x: fieldX(12.5), y: fieldY(-10) },
     { id: 'd4', label: 'X', x: fieldX(15), y: fieldY(-5) },
-    { id: 'd5', label: 'X', x: fieldX(20), y: fieldY(-5) }
+    { id: 'd5', label: 'X', x: fieldX(20), y: fieldY(-7) }
   ],
   routes: [],
   annotations: []
