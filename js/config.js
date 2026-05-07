@@ -348,8 +348,6 @@ const controls = {
   markList: document.querySelector('#markList'),
   mobilePlaybookList: document.querySelector('#mobilePlaybookList'),
   statusText: document.querySelector('#statusText'),
-  bookNoteName: document.querySelector('#bookNoteName'),
-  playNoteName: document.querySelector('#playNoteName'),
   endCap: document.querySelector('#endCap'),
   defenseToggle: document.querySelector('#defenseToggle')
 };

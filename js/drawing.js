@@ -621,6 +621,27 @@ function drawTemp() {
   layers.temp.append(group);
 }
 
+function renderDragUpdate(kind) {
+  if (kind === 'route-point' || kind === 'route-move') {
+    drawRoutes();
+    return;
+  }
+  if (kind === 'player') {
+    drawRoutes();
+    drawPlayers();
+    return;
+  }
+  if (kind === 'defender') {
+    drawPlayers();
+    return;
+  }
+  if (kind === 'annotation') {
+    drawText();
+    return;
+  }
+  render();
+}
+
 function drawMarkControls() {
   controls.markList.replaceChildren();
   state.players.forEach((player) => {
@@ -651,17 +672,6 @@ function drawMarkControls() {
     item.append(badge, select);
   controls.markList.append(item);
   });
-}
-
-function clearGeneratedFieldLayers() {
-  layers.grid.replaceChildren();
-  layers.routeHits.replaceChildren();
-  layers.defenders.replaceChildren();
-  layers.routes.replaceChildren();
-  layers.temp.replaceChildren();
-  layers.players.replaceChildren();
-  layers.text.replaceChildren();
-  layers.meta.replaceChildren();
 }
 
 function drawSourceImage() {
@@ -833,17 +843,7 @@ function render() {
     marker.setAttribute('markerHeight', 8 * state.endCapSize);
   }
 
-  if (drawSourceImage()) {
-    clearGeneratedFieldLayers();
-    drawMarkControls();
-    renderPlaybookSelectors();
-    syncSelectionControls();
-    syncPresetButtons();
-    syncPlaysetFileBadge();
-    return;
-  }
-
-  layers.sourceImages.replaceChildren();
+  drawSourceImage();
   drawGrid();
   drawRoutes();
   drawTemp();

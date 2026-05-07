@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -130,7 +130,10 @@
             <button class="wide-button danger" type="button" data-action="delete-selected" disabled>Delete</button>
           </div>
           <div class="action-row tool-actions">
+            <button class="wide-button danger" type="button" data-action="clear-routes" disabled>Clear Lines</button>
             <button class="wide-button danger" type="button" data-action="reset-play-diagram" disabled>Reset Play</button>
+          </div>
+          <div class="action-row tool-actions">
             <button class="wide-button" type="button" data-action="toggle-fullscreen">Fullscreen</button>
           </div>
           <label class="check-row">
@@ -326,6 +329,7 @@
         <button class="dock-action-button mobile-undo-button" type="button" data-action="undo-history" title="Undo" aria-disabled="true"><span class="tool-icon">↶</span><span>Undo</span></button>
         <button class="dock-action-button mobile-redo-button" type="button" data-action="redo-history" title="Redo" aria-disabled="true"><span class="tool-icon">↷</span><span>Redo</span></button>
         <button class="dock-action-button" type="button" data-action="flip-play" title="Flip horizontally"><span class="tool-icon">⇄</span><span>Flip</span></button>
+        <button class="dock-action-button danger mobile-clear-lines-button" type="button" data-action="clear-routes" title="Clear all lines" disabled><span class="tool-icon">⌧</span><span>Clear</span></button>
         <button class="dock-action-button danger mobile-reset-button" type="button" data-action="reset-play-diagram" title="Reset play diagram" disabled><span class="tool-icon">↺</span><span>Reset</span></button>
         <button class="dock-action-button mobile-panel-button" type="button" data-action="toggle-mobile-offense-panel" title="Offense formations"><span class="tool-icon">O</span><span>Off</span></button>
         <button class="dock-action-button mobile-panel-button" type="button" data-action="toggle-mobile-defense-panel" title="Defense formations"><span class="tool-icon">D</span><span>Def</span></button>
@@ -333,13 +337,13 @@
     </nav>
     <div id="printBook" class="print-book" aria-hidden="true"></div>
 
-    <script src="js/config.js?v=20260507-brand1"></script>
+    <script src="js/config.js?v=20260507-fix1"></script>
     <script src="js/model.js?v=20260507-lines1"></script>
     <script src="js/playbook-tree.js?v=20260507-endcap1"></script>
-    <script src="js/drawing.js?v=20260507-arrow1"></script>
-    <script src="js/field-interactions.js?v=20260507-anchor1"></script>
-    <script src="js/files.js?v=20260507-brand1"></script>
+    <script src="js/drawing.js?v=20260507-fix1"></script>
+    <script src="js/field-interactions.js?v=20260507-fix1"></script>
+    <script src="js/files.js?v=20260507-fix1"></script>
     <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
-    <script src="js/main.js?v=20260507-lines1"></script>
+    <script src="js/main.js?v=20260507-fix1"></script>
   </body>
 </html>

@@ -604,7 +604,7 @@ function handlePointerMove(event) {
     const route = state.routes.find((item) => item.id === state.drag.id);
     if (!route) return;
     route.points[state.drag.index] = [point.x, point.y];
-    render();
+    renderDragUpdate(state.drag.kind);
     return;
   }
 
@@ -615,7 +615,7 @@ function handlePointerMove(event) {
     const dy = point.y - state.drag.last.y;
     moveRoute(route, dx, dy);
     state.drag.last = point;
-    render();
+    renderDragUpdate(state.drag.kind);
     return;
   }
 
@@ -625,7 +625,7 @@ function handlePointerMove(event) {
   item.x = point.x + state.drag.dx;
   item.y = point.y + state.drag.dy;
   if (state.drag.kind === 'player') moveLinkedRouteStarts(item);
-  render();
+  renderDragUpdate(state.drag.kind);
 }
 
 function handlePointerUp(event) {

@@ -152,7 +152,7 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 - 青い点をドラッグするとルートを調整、黄色い点をドラッグすると中間点を追加
 - Text ツールでプレイ内にコメントを書き込み
 - 赤星は なし / 1-5 から切り替え
-- 線を全消去でルートをまとめてクリア
+- Clear Lines でルートをまとめてクリア
 - Folder と Play でプレイブックを整理してJSON保存
 - PDF ボタンで印刷ダイアログを開き、PDFとして保存
 - PNG と JSON でファイル出力

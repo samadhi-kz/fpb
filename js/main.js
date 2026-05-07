@@ -174,6 +174,7 @@ function bindTouchFriendlyCommand(selector, handler) {
 
 bindTouchFriendlyCommand('[data-action="undo-history"]', undoCommand);
 bindTouchFriendlyCommand('[data-action="redo-history"]', redoCommand);
+bindTouchFriendlyCommand('[data-action="clear-routes"]', clearRoutes);
 bindTouchFriendlyCommand('[data-action="reset-play-diagram"]', resetPlayDiagram);
 bindTouchFriendlyCommand('[data-action="set-qb-setback"]', () => setQbDepth(2, 'Setback'));
 bindTouchFriendlyCommand('[data-action="set-qb-shotgun"]', () => setQbDepth(5, 'Shotgun'));
