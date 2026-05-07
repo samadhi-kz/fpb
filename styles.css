@@ -912,11 +912,11 @@ body.is-focus-mode .canvas-wrap::-webkit-scrollbar {
 body.is-focus-mode #field {
   display: block;
   width: var(--focus-field-width, 100vw);
-  min-width: 100vw;
+  min-width: 0;
   height: var(--focus-field-height, 72vw);
   max-width: none;
   max-height: none;
-  margin: 0;
+  margin: 0 auto;
   border-radius: 0;
   box-shadow: none;
 }
@@ -2194,12 +2194,12 @@ body.is-focus-mode .mobile-full-button .tool-icon {
   body.is-focus-mode #field {
     display: block;
     width: var(--focus-field-width, 100vw);
-    min-width: 100vw;
+    min-width: 0;
     height: var(--focus-field-height, 72vw);
     max-width: none;
     max-height: none;
     flex: 0 0 auto;
-    margin: 0;
+    margin: 0 auto;
     border-radius: 0;
     box-shadow: none;
   }

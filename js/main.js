@@ -490,7 +490,7 @@ let focusPinch = null;
 let focusZoom = 1;
 let focusBaseFieldWidth = 0;
 let focusBaseFieldHeight = 0;
-const FOCUS_ZOOM_MIN = 0.72;
+const FOCUS_ZOOM_MIN = 0.4;
 const FOCUS_ZOOM_MAX = 2.8;
 const FOCUS_ZOOM_STEP = 1.18;
 
