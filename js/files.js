@@ -25,6 +25,10 @@ function safeFileBase(name, fallback = 'play') {
   return String(name || fallback).trim().replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, ' ') || fallback;
 }
 
+const PLAY_SHARE_HASH_KEY = 'play';
+const PLAY_SHARE_PREFIX_RAW = 'p1.';
+const PLAY_SHARE_PREFIX_GZIP = 'p1z.';
+
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -233,6 +237,176 @@ function fileNameWithJsonExtension(name) {
 function currentPlaysetJson() {
   syncPlaybookState();
   return JSON.stringify(state.playbook, null, 2);
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.slice(index, index + chunkSize));
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64UrlToBytes(value) {
+  const padded = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const base64 = padded.padEnd(Math.ceil(padded.length / 4) * 4, '=');
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
+}
+
+async function gzipText(text) {
+  if (!window.CompressionStream) return null;
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+async function gunzipText(bytes) {
+  if (!window.DecompressionStream) throw new Error('Compressed links are not supported in this browser');
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+}
+
+function playbookForCurrentPlayLink() {
+  syncPlaybookState();
+  const folder = activeFolder();
+  const play = currentPlaySnapshot();
+  return {
+    formatVersion: PLAYBOOK_FORMAT_VERSION,
+    activeFolderId: folder?.id || 'shared-folder',
+    activePlayId: play.id,
+    folders: [
+      {
+        id: folder?.id || 'shared-folder',
+        name: folder?.name || 'Shared Play',
+        plays: [
+          {
+            ...play,
+            sourceImage: ''
+          }
+        ]
+      }
+    ]
+  };
+}
+
+async function encodePlaySharePayload(payload) {
+  const text = JSON.stringify(payload);
+  try {
+    const gzipBytes = await gzipText(text);
+    if (gzipBytes) return `${PLAY_SHARE_PREFIX_GZIP}${bytesToBase64Url(gzipBytes)}`;
+  } catch (error) {
+    console.warn('Play link compression failed; using raw payload.', error);
+  }
+  return `${PLAY_SHARE_PREFIX_RAW}${bytesToBase64Url(new TextEncoder().encode(text))}`;
+}
+
+async function decodePlaySharePayload(token) {
+  const value = String(token || '').trim();
+  if (value.startsWith(PLAY_SHARE_PREFIX_GZIP)) {
+    const text = await gunzipText(base64UrlToBytes(value.slice(PLAY_SHARE_PREFIX_GZIP.length)));
+    return JSON.parse(text);
+  }
+  const rawValue = value.startsWith(PLAY_SHARE_PREFIX_RAW)
+    ? value.slice(PLAY_SHARE_PREFIX_RAW.length)
+    : value;
+  return JSON.parse(new TextDecoder().decode(base64UrlToBytes(rawValue)));
+}
+
+function currentPageUrlWithoutHash() {
+  const url = new URL(window.location.href);
+  url.hash = '';
+  return url.toString();
+}
+
+function shouldUseNativeLinkShare() {
+  return Boolean(navigator.share)
+    && (isAppleTouchDevice() || navigator.maxTouchPoints > 1 || /Android/i.test(navigator.userAgent));
+}
+
+async function copyText(text) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return true;
+  }
+
+  const area = document.createElement('textarea');
+  area.value = text;
+  area.setAttribute('readonly', '');
+  area.style.position = 'fixed';
+  area.style.left = '-9999px';
+  area.style.top = '0';
+  document.body.append(area);
+  area.select();
+  const copied = document.execCommand('copy');
+  area.remove();
+  if (!copied) throw new Error('Clipboard copy failed');
+  return true;
+}
+
+async function shareCurrentPlayLink() {
+  saveLocal(false);
+  try {
+    const playbook = playbookForCurrentPlayLink();
+    const token = await encodePlaySharePayload(playbook);
+    const shareUrl = `${currentPageUrlWithoutHash()}#${PLAY_SHARE_HASH_KEY}=${token}`;
+    const playName = playbook.folders[0]?.plays[0]?.name || 'Flag Play Board';
+
+    if (shouldUseNativeLinkShare() && /^https?:$/.test(new URL(shareUrl).protocol)) {
+      try {
+        await navigator.share({ title: playName, text: 'Flag Play Board', url: shareUrl });
+        setStatus(`Play Link Shared (${shareUrl.length})`);
+        return;
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          setStatus('Cancelled');
+          return;
+        }
+      }
+    }
+
+    await copyText(shareUrl);
+    setStatus(`Play Link Copied (${shareUrl.length})`);
+  } catch (error) {
+    console.error(error);
+    alert('Play Linkを作成できませんでした。JSON保存を使ってください。');
+    setStatus('Play Link Failed');
+  }
+}
+
+function sharedPlayTokenFromLocation() {
+  const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+  if (!hash) return '';
+  return new URLSearchParams(hash).get(PLAY_SHARE_HASH_KEY) || '';
+}
+
+async function loadSharedPlayFromUrl() {
+  const token = sharedPlayTokenFromLocation();
+  if (!token) return false;
+  try {
+    const playbook = normalizeImportedPlaybook(await decodePlaySharePayload(token));
+    state.playbook = playbook;
+    state.activeFolderId = playbook.activeFolderId;
+    state.activePlayId = playbook.activePlayId;
+    state.fileHandle = null;
+    state.fileName = 'Shared Play Link';
+    state.openFolderIds = new Set(playbook.folders.map((folder) => folder.id));
+    const play = activePlay();
+    if (play) applyPlay(play);
+    else clearActivePlayView('No Play Selected');
+    saveLocal(false);
+    syncPlaysetFileBadge();
+    resetHistory();
+    setStatus('Shared Play Loaded');
+    return true;
+  } catch (error) {
+    console.error(error);
+    alert('Play Linkを読み込めませんでした。リンクが途中で切れている可能性があります。');
+    setStatus('Play Link Load Failed');
+    return false;
+  }
 }
 
 function downloadPlaysetJson(filename = 'flag-playbook.json') {
