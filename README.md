@@ -11,7 +11,7 @@ An interactive web-based tool for designing and visualizing flag football plays.
 - Customize player markers (light blue circles, red stars, yellow diamonds, green squares)
 - Adjust player size and end cap size
 - Save and load plays as JSON
-- Export plays as PNG or PDF
+- Share plays with links and export plays as PDF
 - Manage playbooks with folders and multiple plays
 - Responsive canvas for desktop, tablet, and phone use
 
@@ -24,7 +24,7 @@ An interactive web-based tool for designing and visualizing flag football plays.
 5. Use Defense to show or hide the defensive markers
 6. Customize player markers and sizes
 7. Save your playbook as JSON for later editing
-8. Export plays as PNG or PDF for sharing and printing
+8. Share plays with links or export PDFs for sharing and printing
 
 ## Tools
 
@@ -77,7 +77,7 @@ The presets are defined for one side of the field. Use `Flip H` to mirror the pl
 - Smartphone web use: open the GitHub Pages URL in iOS Safari or Android Chrome.
 - Static hosting only: GitHub Pages or any static file host is enough. No server-side code is required.
 - Optional file-system access: direct overwrite works only in browsers that support the File System Access API. Use `Save As` on Safari and other browsers without direct overwrite support.
-- Export behavior depends on the browser: PNG downloads through the browser, and PDF uses the browser print dialog.
+- Export behavior depends on the browser: links use clipboard/share support, and PDF uses the browser print dialog.
 
 ## Testing
 
@@ -105,7 +105,7 @@ No automated test suite is included. The recommended checks are:
    - new folder/play creation works
    - routes can be drawn, edited, and cleared
    - JSON export/import works
-   - PNG and PDF export functions open correctly
+   - link sharing and PDF export functions open correctly
 3. Open the GitHub Pages URL on a desktop browser and verify static hosting works normally.
 4. Open the GitHub Pages URL on a smartphone and verify tapping, route creation, the bottom dock, formation buttons, and file export work as expected.
 5. Confirm the app remains functional when switching between tools and when using the save/load workflow.
@@ -123,7 +123,7 @@ No automated test suite is included. The recommended checks are:
 - Playbook JSON is parsed in the browser and normalized before use.
 - User-controlled names, notes, and comments are rendered with text APIs instead of HTML injection.
 - File open/save uses browser file dialogs or browser downloads.
-- Do not include private or sensitive information in play notes if you plan to share exported JSON, PNG, or PDF files.
+- Do not include private or sensitive information in play notes if you plan to share exported JSON, links, or PDF files.
 
 ## License
 
@@ -155,5 +155,5 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 - Clear Lines でルートをまとめてクリア
 - Folder と Play でプレイブックを整理してJSON保存
 - PDF ボタンで印刷ダイアログを開き、PDFとして保存
-- PNG と JSON でファイル出力
+- JSON でファイル出力
 - 5v5固定のため、選手と守備Xは常に5人ずつです

@@ -195,7 +195,6 @@ bindTouchFriendlyCommand('[data-action="mobile-add-json"]', openAddPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-save-photo"]', savePhoto);
 bindTouchFriendlyCommand('[data-action="mobile-share-play-link"]', shareCurrentPlayLink);
 bindTouchFriendlyCommand('[data-action="mobile-share-book-link"]', shareCurrentBookLink);
-bindTouchFriendlyCommand('[data-action="mobile-export-png"]', exportPng);
 bindTouchFriendlyCommand('[data-action="mobile-pdf-current"]', exportCurrentPdf);
 bindTouchFriendlyCommand('[data-action="mobile-pdf-book"]', exportPlaybookPdf);
 bindTouchFriendlyCommand('[data-action="mobile-save-json"]', savePlaysetAs);
@@ -227,7 +226,6 @@ document.querySelectorAll('[data-action="rename-active-play"]').forEach((button)
 document.querySelector('#openPlaysetBtn').addEventListener('click', openPlaysetFile);
 document.querySelector('#savePlaysetFileBtn').addEventListener('click', savePlaysetFile);
 document.querySelector('#savePlaysetAsBtn').addEventListener('click', savePlaysetAs);
-document.querySelector('#exportPngBtn').addEventListener('click', exportPng);
 document.querySelector('#exportLoadJsonBtn').addEventListener('click', openPlaysetFile);
 document.querySelector('#exportAddJsonBtn').addEventListener('click', openAddPlaysetFile);
 document.querySelector('#exportJsonBtn').addEventListener('click', savePlaysetAs);
