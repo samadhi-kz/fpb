@@ -28,6 +28,10 @@ function safeFileBase(name, fallback = 'play') {
 const PLAY_SHARE_HASH_KEY = 'play';
 const PLAY_SHARE_PREFIX_RAW = 'p1.';
 const PLAY_SHARE_PREFIX_GZIP = 'p1z.';
+const BOOK_SHARE_HASH_KEY = 'book';
+const BOOK_SHARE_PREFIX_RAW = 'b1.';
+const BOOK_SHARE_PREFIX_GZIP = 'b1z.';
+const LONG_SHARE_URL_WARNING_LENGTH = 4000;
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -257,6 +261,12 @@ function base64UrlToBytes(value) {
   return bytes;
 }
 
+async function gzipText(text) {
+  if (!window.CompressionStream) return null;
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
 async function gunzipText(bytes) {
   if (!window.DecompressionStream) throw new Error('Compressed links are not supported in this browser');
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
@@ -286,21 +296,57 @@ function playbookForCurrentPlayLink() {
   };
 }
 
+function playbookWithoutSourceImages(playbook) {
+  const clean = cloneData(playbook);
+  clean.folders = (clean.folders || []).map((folder) => ({
+    ...folder,
+    plays: (folder.plays || []).map((play) => ({
+      ...play,
+      sourceImage: ''
+    }))
+  }));
+  return clean;
+}
+
+function playbookForBookLink() {
+  syncPlaybookState();
+  return playbookWithoutSourceImages(state.playbook);
+}
+
 function encodePlaySharePayload(payload) {
   const text = JSON.stringify(payload);
   return `${PLAY_SHARE_PREFIX_RAW}${bytesToBase64Url(new TextEncoder().encode(text))}`;
 }
 
-async function decodePlaySharePayload(token) {
+async function encodeBookSharePayload(payload) {
+  const text = JSON.stringify(payload);
+  try {
+    const gzipBytes = await gzipText(text);
+    if (gzipBytes) return `${BOOK_SHARE_PREFIX_GZIP}${bytesToBase64Url(gzipBytes)}`;
+  } catch (error) {
+    console.warn('Book link compression failed; using raw payload.', error);
+  }
+  return `${BOOK_SHARE_PREFIX_RAW}${bytesToBase64Url(new TextEncoder().encode(text))}`;
+}
+
+async function decodeSharePayload(token, rawPrefix, gzipPrefix) {
   const value = String(token || '').trim();
-  if (value.startsWith(PLAY_SHARE_PREFIX_GZIP)) {
-    const text = await gunzipText(base64UrlToBytes(value.slice(PLAY_SHARE_PREFIX_GZIP.length)));
+  if (value.startsWith(gzipPrefix)) {
+    const text = await gunzipText(base64UrlToBytes(value.slice(gzipPrefix.length)));
     return JSON.parse(text);
   }
-  const rawValue = value.startsWith(PLAY_SHARE_PREFIX_RAW)
-    ? value.slice(PLAY_SHARE_PREFIX_RAW.length)
+  const rawValue = value.startsWith(rawPrefix)
+    ? value.slice(rawPrefix.length)
     : value;
   return JSON.parse(new TextDecoder().decode(base64UrlToBytes(rawValue)));
+}
+
+async function decodePlaySharePayload(token) {
+  return decodeSharePayload(token, PLAY_SHARE_PREFIX_RAW, PLAY_SHARE_PREFIX_GZIP);
+}
+
+async function decodeBookSharePayload(token) {
+  return decodeSharePayload(token, BOOK_SHARE_PREFIX_RAW, BOOK_SHARE_PREFIX_GZIP);
 }
 
 function currentPageUrlWithoutHash() {
@@ -347,8 +393,47 @@ async function copyText(text) {
   return copied;
 }
 
-function showManualPlayLink(shareUrl) {
-  window.prompt('Play Linkをコピーしてください。', shareUrl);
+function showManualShareLink(label, shareUrl) {
+  window.prompt(`${label}をコピーしてください。`, shareUrl);
+}
+
+function confirmLongShareUrl(label, shareUrl) {
+  if (shareUrl.length < LONG_SHARE_URL_WARNING_LENGTH) return true;
+  return window.confirm(
+    `${label}は ${shareUrl.length} 文字あります。\n\n`
+    + 'LINEやメールでは、長いURLが途中で切れる場合があります。\n'
+    + 'うまく共有できない場合は、Bitlyなどの短縮URLサービスで短くしてください。\n\n'
+    + 'このまま共有/コピーしますか？'
+  );
+}
+
+async function deliverShareUrl(shareUrl, title, label, options = {}) {
+  if (options.warnIfLong && !confirmLongShareUrl(label, shareUrl)) {
+    setStatus('Cancelled');
+    return;
+  }
+
+  if (shouldUseNativeLinkShare() && /^https?:$/.test(new URL(shareUrl).protocol)) {
+    try {
+      await navigator.share({ title, text: 'Flag Play Board', url: shareUrl });
+      setStatus(`${label} Shared (${shareUrl.length})`);
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        setStatus('Cancelled');
+        return;
+      }
+      console.warn('Native share failed; trying clipboard copy.', error);
+    }
+  }
+
+  if (await copyText(shareUrl)) {
+    setStatus(`${label} Copied (${shareUrl.length})`);
+    return;
+  }
+
+  showManualShareLink(label, shareUrl);
+  setStatus(`${label} Ready (${shareUrl.length})`);
 }
 
 async function shareCurrentPlayLink() {
@@ -358,28 +443,7 @@ async function shareCurrentPlayLink() {
     const token = encodePlaySharePayload(playbook);
     const shareUrl = `${currentPageUrlWithoutHash()}#${PLAY_SHARE_HASH_KEY}=${token}`;
     const playName = playbook.folders[0]?.plays[0]?.name || 'Flag Play Board';
-
-    if (shouldUseNativeLinkShare() && /^https?:$/.test(new URL(shareUrl).protocol)) {
-      try {
-        await navigator.share({ title: playName, text: 'Flag Play Board', url: shareUrl });
-        setStatus(`Play Link Shared (${shareUrl.length})`);
-        return;
-      } catch (error) {
-        if (error?.name === 'AbortError') {
-          setStatus('Cancelled');
-          return;
-        }
-        console.warn('Native share failed; trying clipboard copy.', error);
-      }
-    }
-
-    if (await copyText(shareUrl)) {
-      setStatus(`Play Link Copied (${shareUrl.length})`);
-      return;
-    }
-
-    showManualPlayLink(shareUrl);
-    setStatus(`Play Link Ready (${shareUrl.length})`);
+    await deliverShareUrl(shareUrl, playName, 'Play Link');
   } catch (error) {
     console.error(error);
     alert('Play Linkを作成できませんでした。JSON保存を使ってください。');
@@ -387,10 +451,43 @@ async function shareCurrentPlayLink() {
   }
 }
 
-function sharedPlayTokenFromLocation() {
+async function shareCurrentBookLink() {
+  saveLocal(false);
+  try {
+    const playbook = playbookForBookLink();
+    const token = await encodeBookSharePayload(playbook);
+    const shareUrl = `${currentPageUrlWithoutHash()}#${BOOK_SHARE_HASH_KEY}=${token}`;
+    const bookName = activeFolder()?.name || 'Flag Play Board';
+    await deliverShareUrl(shareUrl, bookName, 'Book Link', { warnIfLong: true });
+  } catch (error) {
+    console.error(error);
+    alert('Book Linkを作成できませんでした。Bookが大きい場合はJSON保存を使ってください。');
+    setStatus('Book Link Failed');
+  }
+}
+
+function sharedTokenFromLocation(key) {
   const hash = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
   if (!hash) return '';
-  return new URLSearchParams(hash).get(PLAY_SHARE_HASH_KEY) || '';
+  return new URLSearchParams(hash).get(key) || '';
+}
+
+function sharedPlayTokenFromLocation() {
+  return sharedTokenFromLocation(PLAY_SHARE_HASH_KEY);
+}
+
+function sharedBookTokenFromLocation() {
+  return sharedTokenFromLocation(BOOK_SHARE_HASH_KEY);
+}
+
+function clearSharedHash() {
+  if (!window.history?.replaceState) {
+    window.location.hash = '';
+    return;
+  }
+  const url = new URL(window.location.href);
+  url.hash = '';
+  window.history.replaceState(null, document.title, url.toString());
 }
 
 async function loadSharedPlayFromUrl() {
@@ -410,6 +507,7 @@ async function loadSharedPlayFromUrl() {
     saveLocal(false);
     syncPlaysetFileBadge();
     resetHistory();
+    clearSharedHash();
     setStatus('Shared Play Loaded');
     return true;
   } catch (error) {
@@ -418,6 +516,38 @@ async function loadSharedPlayFromUrl() {
     setStatus('Play Link Load Failed');
     return false;
   }
+}
+
+async function loadSharedBookFromUrl() {
+  const token = sharedBookTokenFromLocation();
+  if (!token) return false;
+  try {
+    const playbook = normalizeImportedPlaybook(await decodeBookSharePayload(token));
+    state.playbook = playbook;
+    state.activeFolderId = playbook.activeFolderId;
+    state.activePlayId = playbook.activePlayId;
+    state.fileHandle = null;
+    state.fileName = 'Shared Book Link';
+    state.openFolderIds = new Set(playbook.folders.map((folder) => folder.id));
+    const play = activePlay();
+    if (play) applyPlay(play);
+    else clearActivePlayView('No Play Selected');
+    saveLocal(false);
+    syncPlaysetFileBadge();
+    resetHistory();
+    clearSharedHash();
+    setStatus('Shared Book Loaded');
+    return true;
+  } catch (error) {
+    console.error(error);
+    alert('Book Linkを読み込めませんでした。リンクが途中で切れている可能性があります。');
+    setStatus('Book Link Load Failed');
+    return false;
+  }
+}
+
+async function loadSharedLinkFromUrl() {
+  return (await loadSharedBookFromUrl()) || (await loadSharedPlayFromUrl());
 }
 
 function downloadPlaysetJson(filename = 'flag-playbook.json') {

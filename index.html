@@ -194,8 +194,11 @@
         <section class="panel export-panel">
           <div class="action-row">
             <button id="deleteBtn" class="wide-button danger" type="button">Delete</button>
-            <button id="sharePlayLinkExportBtn" class="wide-button" type="button">Link</button>
             <button id="exportPngBtn" class="wide-button" type="button">PNG</button>
+          </div>
+          <div class="action-row">
+            <button id="sharePlayLinkExportBtn" class="wide-button" type="button">Play Link</button>
+            <button id="shareBookLinkExportBtn" class="wide-button" type="button">Book Link</button>
           </div>
           <div class="action-row">
             <button id="pdfCurrentBtn" class="wide-button primary" type="button">PDF Play</button>
@@ -262,7 +265,8 @@
         <span class="mobile-row-label">Export</span>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-load-json" title="Load playbook JSON"><span class="tool-icon">{⇧}</span><span>Load</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-add-json" title="Add folders from JSON"><span class="tool-icon">{+}</span><span>Add</span></button>
-        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-share-play-link" title="Share current play link"><span class="tool-icon">↗</span><span>Link</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-share-play-link" title="Share current play link"><span class="tool-icon">↗</span><span>Play</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-share-book-link" title="Share full book link"><span class="tool-icon">↗</span><span>Book</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-photo" title="Save photo"><span class="tool-icon">◎</span><span>Photo</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-export-png" title="Download PNG"><span class="tool-icon">▣</span><span>PNG</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-pdf-current" title="Save current play PDF"><span class="tool-icon">PDF</span><span>Play</span></button>
@@ -349,8 +353,8 @@
     <script src="js/playbook-tree.js?v=20260507-endcap1"></script>
     <script src="js/drawing.js?v=20260507-fix1"></script>
     <script src="js/field-interactions.js?v=20260507-fix1"></script>
-    <script src="js/files.js?v=20260508-share2"></script>
+    <script src="js/files.js?v=20260508-share4"></script>
     <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
-    <script src="js/main.js?v=20260508-share1"></script>
+    <script src="js/main.js?v=20260508-share4"></script>
   </body>
 </html>

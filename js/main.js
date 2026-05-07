@@ -194,6 +194,7 @@ bindTouchFriendlyCommand('[data-action="mobile-load-json"]', openPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-add-json"]', openAddPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-save-photo"]', savePhoto);
 bindTouchFriendlyCommand('[data-action="mobile-share-play-link"]', shareCurrentPlayLink);
+bindTouchFriendlyCommand('[data-action="mobile-share-book-link"]', shareCurrentBookLink);
 bindTouchFriendlyCommand('[data-action="mobile-export-png"]', exportPng);
 bindTouchFriendlyCommand('[data-action="mobile-pdf-current"]', exportCurrentPdf);
 bindTouchFriendlyCommand('[data-action="mobile-pdf-book"]', exportPlaybookPdf);
@@ -232,6 +233,7 @@ document.querySelector('#exportAddJsonBtn').addEventListener('click', openAddPla
 document.querySelector('#exportJsonBtn').addEventListener('click', savePlaysetAs);
 document.querySelector('#sharePlayLinkBtn').addEventListener('click', shareCurrentPlayLink);
 document.querySelector('#sharePlayLinkExportBtn').addEventListener('click', shareCurrentPlayLink);
+document.querySelector('#shareBookLinkExportBtn').addEventListener('click', shareCurrentBookLink);
 document.querySelector('#savePhotoBtn').addEventListener('click', savePhoto);
 document.querySelector('#pdfCurrentBtn').addEventListener('click', exportCurrentPdf);
 document.querySelector('#pdfBookBtn').addEventListener('click', exportPlaybookPdf);
@@ -908,8 +910,8 @@ mobileDockHandle?.addEventListener('pointercancel', endFocusDockDrag);
 async function startApp() {
   syncFullscreenButtons();
   syncMobileDockPanels();
-  const loadedSharedPlay = await loadSharedPlayFromUrl();
-  if (!loadedSharedPlay) loadInitialState();
+  const loadedSharedLink = await loadSharedLinkFromUrl();
+  if (!loadedSharedLink) loadInitialState();
   if (isMobileLayout()) {
     window.requestAnimationFrame(() => setFocusMode(true));
   }
