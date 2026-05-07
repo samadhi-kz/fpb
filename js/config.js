@@ -251,9 +251,9 @@ const defaultPlay = {
   players: [
     { id: 'p1', label: '1', x: fieldX(12.5), y: fieldY(0), role: 'center' },
     { id: 'p2', label: '2', x: fieldX(12.5), y: fieldY(5), role: 'qb' },
-    { id: 'p3', label: '3', x: fieldX(10), y: fieldY(0), role: 'skill' },
-    { id: 'p4', label: '4', x: fieldX(15), y: fieldY(0), role: 'skill' },
-    { id: 'p5', label: '5', x: fieldX(20), y: fieldY(0), role: 'skill' }
+    { id: 'p3', label: '3', x: fieldX(9), y: fieldY(0), role: 'skill' },
+    { id: 'p4', label: '4', x: fieldX(3), y: fieldY(0), role: 'skill' },
+    { id: 'p5', label: '5', x: fieldX(22), y: fieldY(0), role: 'skill' }
   ],
   defenders: [
     { id: 'd1', label: 'X', x: fieldX(5), y: fieldY(-7) },
