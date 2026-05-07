@@ -397,19 +397,29 @@ function showManualShareLink(label, shareUrl) {
   window.prompt(`${label}をコピーしてください。`, shareUrl);
 }
 
-function confirmLongShareUrl(label, shareUrl) {
+function confirmLongShareCopy(label, shareUrl) {
   if (shareUrl.length < LONG_SHARE_URL_WARNING_LENGTH) return true;
   return window.confirm(
     `${label}は ${shareUrl.length} 文字あります。\n\n`
     + 'LINEやメールでは、長いURLが途中で切れる場合があります。\n'
     + 'うまく共有できない場合は、Bitlyなどの短縮URLサービスで短くしてください。\n\n'
-    + 'このまま共有/コピーしますか？'
+    + 'OKを押すとリンクをコピーします。'
   );
 }
 
 async function deliverShareUrl(shareUrl, title, label, options = {}) {
-  if (options.warnIfLong && !confirmLongShareUrl(label, shareUrl)) {
-    setStatus('Cancelled');
+  const shouldCopyAfterWarning = options.warnIfLong && shareUrl.length >= LONG_SHARE_URL_WARNING_LENGTH;
+  if (shouldCopyAfterWarning) {
+    if (!confirmLongShareCopy(label, shareUrl)) {
+      setStatus('Cancelled');
+      return;
+    }
+    if (await copyText(shareUrl)) {
+      setStatus(`${label} Copied (${shareUrl.length})`);
+      return;
+    }
+    showManualShareLink(label, shareUrl);
+    setStatus(`${label} Ready (${shareUrl.length})`);
     return;
   }
 
