@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flag Play Board</title>
+    <link rel="stylesheet" href="styles.css?v=20260507-lines1">
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <header class="brand">
+          <div>
+            <p class="eyebrow">Flag Football 5 vs 5</p>
+            <h1>Flag Play Board</h1>
+          </div>
+          <button id="newPlayBtn" class="icon-button" type="button" title="New Play">+</button>
+        </header>
+
+        <section class="panel playbook-panel">
+          <div class="panel-title">Playbook</div>
+          <div class="action-row">
+            <button id="newFolderBtn" class="wide-button" type="button">+ Folder</button>
+            <button id="newPlayInFolderBtn" class="wide-button" type="button">+ Play</button>
+          </div>
+          <div id="playbookTree" class="playbook-tree" role="tree" aria-label="Playbook"></div>
+        </section>
+
+        <section class="panel playset-panel">
+          <div class="panel-title">Playset File</div>
+          <div id="playsetFileName" class="file-badge">Save Location: Not Selected</div>
+          <div id="playsetFileHint" class="file-hint">Open JSON or save with a name to enable overwrite save.</div>
+          <input id="playsetFileInput" class="visually-hidden" type="file" accept=".json,application/json">
+          <div class="action-row">
+            <button id="openPlaysetBtn" class="wide-button" type="button">Open JSON</button>
+            <button id="savePlaysetFileBtn" class="wide-button primary" type="button">Overwrite Save</button>
+          </div>
+          <button id="savePlaysetAsBtn" class="wide-button" type="button">Save As</button>
+        </section>
+
+        <section class="panel formation-panel">
+          <div class="panel-title">Offense Formation</div>
+          <div class="formation-grid" aria-label="Offense formations">
+            <button class="formation-button" type="button" data-formation="singleBack">Single back</button>
+            <button class="formation-button" type="button" data-formation="spread">Spread</button>
+            <button class="formation-button" type="button" data-formation="twins">Twins</button>
+            <button class="formation-button" type="button" data-formation="twinsStack">Twins stack</button>
+            <button class="formation-button" type="button" data-formation="trips">Trips</button>
+            <button class="formation-button" type="button" data-formation="bunch">Bunch</button>
+            <button class="formation-button" type="button" data-formation="tight">Tight</button>
+            <button class="formation-button" type="button" data-formation="doubleBack">Double back</button>
+            <button class="formation-button" type="button" data-formation="iFormation">I formation</button>
+          </div>
+          <div class="action-row formation-actions">
+            <button class="wide-button" type="button" data-action="flip-play">Flip H</button>
+            <button class="wide-button" type="button" data-action="set-qb-setback">Setback</button>
+            <button class="wide-button" type="button" data-action="set-qb-shotgun">Shotgun</button>
+          </div>
+        </section>
+
+        <section class="panel defense-formation-panel">
+          <div class="panel-title">Defense Formation</div>
+          <div class="formation-grid" aria-label="Defense formations">
+            <button class="formation-button" type="button" data-defense-formation="normal">Normal</button>
+            <button class="formation-button" type="button" data-defense-formation="man0">Man 0</button>
+            <button class="formation-button" type="button" data-defense-formation="oneDeep">1 Deep</button>
+            <button class="formation-button" type="button" data-defense-formation="cover2">Cover 2</button>
+            <button class="formation-button" type="button" data-defense-formation="cover3">Cover 3</button>
+            <button class="formation-button" type="button" data-defense-formation="boxZone">Box Zone</button>
+            <button class="formation-button" type="button" data-defense-formation="goalLine">Goal Line</button>
+            <button class="formation-button" type="button" data-defense-formation="prevent">Prevent</button>
+          </div>
+          <div class="action-row formation-actions">
+            <button class="wide-button" type="button" data-action="toggle-defense-visible">Hide D</button>
+          </div>
+        </section>
+
+        <section class="panel drawing-tools-panel">
+          <div class="panel-title">Tools</div>
+          <div class="segmented" role="group" aria-label="Tools">
+            <button class="tool-button is-active" type="button" data-tool="select" title="Select"><span class="tool-icon">↖</span><span>Select</span></button>
+            <button class="tool-button" type="button" data-tool="route" title="Route"><span class="tool-icon">➜</span><span>Route</span></button>
+            <button class="tool-button" type="button" data-tool="draw" title="Free Form"><span class="tool-icon">✎</span><span>Free</span></button>
+            <button class="tool-button" type="button" data-tool="motion" title="Motion"><span class="tool-icon">〰</span><span>Motion</span></button>
+            <button class="tool-button" type="button" data-tool="pass" title="Pass"><span class="tool-icon">⋯</span><span>Pass</span></button>
+            <button class="tool-button" type="button" data-tool="block" title="Block"><span class="tool-icon">⊣</span><span>Block</span></button>
+            <button class="tool-button" type="button" data-tool="text" title="Comment"><span class="tool-icon">T</span><span>Comment</span></button>
+          </div>
+
+          <div class="control-grid">
+            <label>
+              <span>End Cap</span>
+              <select id="endCap">
+                <option value="arrow">Arrow</option>
+                <option value="t">T</option>
+                <option value="dot">Dot</option>
+                <option value="none">None</option>
+              </select>
+            </label>
+            <label>
+              <span>Shape</span>
+              <select id="routeShape">
+                <option value="straight">Straight</option>
+                <option value="curve">Curve</option>
+                <option value="draw">Drawn</option>
+              </select>
+            </label>
+          </div>
+          <div class="line-type-control">
+            <span>Line Type</span>
+            <div class="line-type-row" role="group" aria-label="Selected line type">
+              <button class="dock-action-button line-type-button" type="button" data-line-type="route" title="Solid line"><span class="tool-icon">━</span><span>Solid</span></button>
+              <button class="dock-action-button line-type-button" type="button" data-line-type="motion" title="Wave line"><span class="tool-icon">〰</span><span>Wave</span></button>
+              <button class="dock-action-button line-type-button" type="button" data-line-type="pass" title="Dotted line"><span class="tool-icon">⋯</span><span>Dots</span></button>
+            </div>
+          </div>
+          <div class="preset-grid" id="routePresets" aria-label="Route presets">
+            <button class="preset-button" type="button" data-preset="go">Go</button>
+            <button class="preset-button" type="button" data-preset="out">Out</button>
+            <button class="preset-button" type="button" data-preset="in">In</button>
+            <button class="preset-button" type="button" data-preset="slant">Slant</button>
+            <button class="preset-button" type="button" data-preset="post">Post</button>
+            <button class="preset-button" type="button" data-preset="corner">Corner</button>
+            <button class="preset-button" type="button" data-preset="curl">Curl</button>
+            <button class="preset-button" type="button" data-preset="motion">Motion</button>
+            <button class="preset-button" type="button" data-preset="block">Block</button>
+          </div>
+          <div class="action-row tool-actions">
+            <button class="wide-button" type="button" data-action="finish-route" disabled>Done</button>
+            <button class="wide-button danger" type="button" data-action="delete-selected" disabled>Delete</button>
+          </div>
+          <div class="action-row tool-actions">
+            <button class="wide-button danger" type="button" data-action="reset-play-diagram" disabled>Reset Play</button>
+            <button class="wide-button" type="button" data-action="toggle-fullscreen">Fullscreen</button>
+          </div>
+          <label class="check-row">
+            <input id="defenseToggle" type="checkbox" checked>
+            <span>Defense</span>
+          </label>
+          <label class="range-row" for="playerSize">
+            <span>Player Size</span>
+            <input id="playerSize" type="range" min="5" max="35" step="1" value="25">
+            <output id="playerSizeValue" for="playerSize">25</output>
+          </label>
+          <label class="range-row" for="endCapSize">
+            <span>End Cap Size</span>
+            <input id="endCapSize" type="range" min="0.5" max="2" step="0.1" value="0.5">
+            <output id="endCapSizeValue" for="endCapSize">0.5</output>
+          </label>
+          <label class="color-row" for="lineColor">
+            <span>Line Color</span>
+            <input id="lineColor" type="color" value="#101010">
+          </label>
+          <label class="range-row" for="lineWidth">
+            <span>Line Width</span>
+            <input id="lineWidth" type="range" min="2" max="16" step="1" value="5">
+            <output id="lineWidthValue" for="lineWidth">5</output>
+          </label>
+          <label class="range-row" for="lineOpacity">
+            <span>Opacity</span>
+            <input id="lineOpacity" type="range" min="0.2" max="1" step="0.05" value="1">
+            <output id="lineOpacityValue" for="lineOpacity">1.00</output>
+          </label>
+        </section>
+
+        <section class="panel selection-panel">
+          <div class="panel-title">Selection</div>
+          <div id="selectionBadge" class="selection-badge">Not Selected</div>
+          <label class="field-label" for="selectedText">Comment</label>
+          <textarea id="selectedText" class="text-area" rows="3" placeholder="Select a comment" disabled></textarea>
+        </section>
+
+        <section class="panel notes-panel">
+          <div class="panel-title">Play Notes</div>
+          <div id="bookNoteLabel" class="book-note-label">
+            <div class="book-note-item"><span class="book-note-title">Book</span>: <span id="bookNoteName">My Play Book</span></div>
+            <div class="book-note-item"><span class="book-note-title">Play</span>: <span id="playNoteName">New Play</span></div>
+          </div>
+          <textarea id="playNotes" class="text-area" rows="3" placeholder="Notes"></textarea>
+        </section>
+
+        <section class="panel marks-panel marks">
+          <div class="panel-title">Marks</div>
+          <div id="markList" class="mark-list"></div>
+        </section>
+
+        <section class="panel export-panel">
+          <div class="action-row">
+            <button id="deleteBtn" class="wide-button danger" type="button">Delete</button>
+            <button id="exportPngBtn" class="wide-button" type="button">PNG</button>
+          </div>
+          <div class="action-row">
+            <button id="pdfCurrentBtn" class="wide-button primary" type="button">PDF Play</button>
+            <button id="pdfBookBtn" class="wide-button primary" type="button">PDF Book</button>
+          </div>
+          <div class="action-row">
+            <button id="exportLoadJsonBtn" class="wide-button" type="button">Load JSON</button>
+            <button id="exportAddJsonBtn" class="wide-button" type="button">Add JSON</button>
+            <button id="exportJsonBtn" class="wide-button" type="button">Save JSON</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <div class="topbar">
+          <div class="title-group">
+            <div id="folderLabel" class="folder-label editable-title" role="button" tabindex="0" data-action="rename-active-folder" title="Rename playbook">My Play Book</div>
+            <h2 id="titleLabel" class="editable-title" role="button" tabindex="0" data-action="rename-active-play" title="Rename play">New Play</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="savePhotoBtn" class="topbar-button" type="button" title="Save photo">Photo</button>
+            <div id="statusText" class="status" role="status" aria-live="polite">Ready</div>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <svg id="field" viewBox="0 0 1000 720" role="img" aria-label="Flag Football Play Diagram">
+            <defs>
+              <marker id="routeArrow" viewBox="0 0 14 14" refX="12" refY="7" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M2 2 L12 7 L2 12" fill="none" stroke="#101010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </marker>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#111" flood-opacity=".18"></feDropShadow>
+              </filter>
+            </defs>
+            <rect class="field-bg" x="0" y="0" width="1000" height="720"></rect>
+            <g id="sourceImageLayer"></g>
+            <g id="gridLayer"></g>
+            <g id="routeHitLayer"></g>
+            <g id="defenderLayer"></g>
+            <g id="routeLayer"></g>
+            <g id="tempLayer"></g>
+            <g id="textLayer"></g>
+            <g id="metaLayer"></g>
+            <g id="playerLayer"></g>
+          </svg>
+        </div>
+      </section>
+    </main>
+    <nav class="mobile-corner-actions" aria-label="Mobile playbook and export">
+      <div class="mobile-corner-title-row">
+        <div id="mobilePlaysetFileName" class="mobile-file-badge" title="No JSON loaded">No JSON</div>
+        <button class="mobile-corner-minimize" type="button" data-action="toggle-corner-minimized" aria-label="Minimize book tools" title="Minimize book tools">−</button>
+      </div>
+      <div class="mobile-corner-stack" role="group" aria-label="Book and export">
+        <button class="mobile-corner-button" type="button" data-action="toggle-mobile-book-panel" title="Playbook"><span class="tool-icon">☰</span><span>Book</span></button>
+        <button class="mobile-corner-button" type="button" data-action="toggle-mobile-export-panel" title="Export"><span class="tool-icon">⇩</span><span>Export</span></button>
+      </div>
+      <div class="mobile-book-row" role="group" aria-label="Mobile playbook" hidden>
+        <div id="mobilePlaybookList" class="mobile-playbook-list"></div>
+      </div>
+      <div class="mobile-export-row" role="group" aria-label="Mobile export actions" hidden>
+        <span class="mobile-row-label">Export</span>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-load-json" title="Load playbook JSON"><span class="tool-icon">{⇧}</span><span>Load</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-add-json" title="Add folders from JSON"><span class="tool-icon">{+}</span><span>Add</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-photo" title="Save photo"><span class="tool-icon">◎</span><span>Photo</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-export-png" title="Download PNG"><span class="tool-icon">▣</span><span>PNG</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-pdf-current" title="Save current play PDF"><span class="tool-icon">PDF</span><span>Play</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-pdf-book" title="Save playbook PDF"><span class="tool-icon">PDF</span><span>Book</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-json" title="Save playbook JSON"><span class="tool-icon">{}</span><span>JSON</span></button>
+      </div>
+    </nav>
+    <nav class="mobile-dock" aria-label="Mobile drawing tools">
+      <button class="mobile-dock-handle" type="button" aria-label="Move tools" title="Move tools">⋮⋮</button>
+      <button class="mobile-dock-minimize" type="button" data-action="toggle-dock-minimized" aria-label="Minimize tools" title="Minimize tools">−</button>
+      <div class="mobile-draw-row" role="group" aria-label="Drawing tools" hidden>
+        <button class="dock-action-button mobile-finish-button" type="button" data-action="finish-route" title="Finish current line" disabled hidden><span class="tool-icon">✓</span><span>Done</span></button>
+        <button class="tool-button" type="button" data-tool="route" title="Route"><span class="tool-icon">➜</span><span>Route</span></button>
+        <button class="tool-button" type="button" data-tool="draw" title="Free Form"><span class="tool-icon">✎</span><span>Free</span></button>
+        <button class="tool-button" type="button" data-tool="motion" title="Motion"><span class="tool-icon">〰</span><span>Motion</span></button>
+        <button class="tool-button" type="button" data-tool="pass" title="Pass"><span class="tool-icon">⋯</span><span>Pass</span></button>
+        <button class="tool-button" type="button" data-tool="block" title="Block"><span class="tool-icon">⊣</span><span>Block</span></button>
+        <button class="tool-button" type="button" data-tool="text" title="Comment"><span class="tool-icon">T</span><span>Comment</span></button>
+      </div>
+      <div class="mobile-line-row" role="group" aria-label="Selected line style" hidden>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-line-type="route" title="Solid line"><span class="tool-icon">━</span><span>Solid</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-line-type="motion" title="Wave line"><span class="tool-icon">〰</span><span>Wave</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-line-type="pass" title="Dotted line"><span class="tool-icon">⋯</span><span>Dots</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-mobile-end-cap="arrow" title="Arrow end"><span class="tool-icon">➜</span><span>Arrow</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-mobile-end-cap="t" title="T end"><span class="tool-icon">⊣</span><span>T</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-mobile-end-cap="dot" title="Dot end"><span class="tool-icon">●</span><span>Dot</span></button>
+        <button class="dock-action-button mobile-line-style-button" type="button" data-mobile-end-cap="none" title="No end cap"><span class="tool-icon">-</span><span>None</span></button>
+        <button class="dock-action-button mobile-line-style-button mobile-color-button" type="button" data-mobile-line-color="#101010" title="Black line"><span class="tool-icon color-icon" style="--line-color: #101010"></span><span>Black</span></button>
+        <button class="dock-action-button mobile-line-style-button mobile-color-button" type="button" data-mobile-line-color="#e71932" title="Red line"><span class="tool-icon color-icon" style="--line-color: #e71932"></span><span>Red</span></button>
+        <button class="dock-action-button mobile-line-style-button mobile-color-button" type="button" data-mobile-line-color="#2f6fed" title="Blue line"><span class="tool-icon color-icon" style="--line-color: #2f6fed"></span><span>Blue</span></button>
+        <button class="dock-action-button mobile-line-style-button mobile-color-button" type="button" data-mobile-line-color="#008579" title="Green line"><span class="tool-icon color-icon" style="--line-color: #008579"></span><span>Green</span></button>
+      </div>
+      <div class="mobile-player-row" role="group" aria-label="Selected player mark" hidden>
+        <button class="dock-action-button mobile-player-number-button" type="button" data-action="rename-selected-player" title="Swap 3/4/5 number"><span class="tool-icon">#</span><span>No.</span></button>
+        <button class="dock-action-button mobile-player-mark-button" type="button" data-mobile-player-mark="ring" title="Blue circle"><span class="tool-icon player-mark-preview is-ring">●</span><span>Blue</span></button>
+        <button class="dock-action-button mobile-player-mark-button" type="button" data-mobile-player-mark="star" title="Red star"><span class="tool-icon player-mark-preview is-star">★</span><span>Star</span></button>
+        <button class="dock-action-button mobile-player-mark-button" type="button" data-mobile-player-mark="diamond" title="Yellow diamond"><span class="tool-icon player-mark-preview is-diamond">◆</span><span>Diamond</span></button>
+        <button class="dock-action-button mobile-player-mark-button" type="button" data-mobile-player-mark="square" title="Green square"><span class="tool-icon player-mark-preview is-square">■</span><span>Square</span></button>
+      </div>
+      <div class="mobile-offense-row" role="group" aria-label="Mobile offense formations" hidden>
+        <span class="mobile-row-label">Offense</span>
+        <button class="dock-action-button mobile-formation-button" type="button" data-action="set-qb-setback" title="Setback QB"><span class="tool-icon">SB</span><span>Setback</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-action="set-qb-shotgun" title="Shotgun QB"><span class="tool-icon">SG</span><span>Shotgun</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="singleBack" title="Single back"><span class="tool-icon">1B</span><span>Single</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="spread" title="Spread"><span class="tool-icon">↔</span><span>Spread</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="twins" title="Twins"><span class="tool-icon">2</span><span>Twins</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="twinsStack" title="Twins stack"><span class="tool-icon">▥</span><span>Stack</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="trips" title="Trips"><span class="tool-icon">3</span><span>Trips</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="bunch" title="Bunch"><span class="tool-icon">●●</span><span>Bunch</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="tight" title="Tight"><span class="tool-icon">⇥</span><span>Tight</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="doubleBack" title="Double back"><span class="tool-icon">2B</span><span>2 Back</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-formation="iFormation" title="I formation"><span class="tool-icon">I</span><span>I Form</span></button>
+      </div>
+      <div class="mobile-defense-row" role="group" aria-label="Mobile defense formations" hidden>
+        <span class="mobile-row-label">Defense</span>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="normal" title="Normal defense"><span class="tool-icon">N</span><span>Normal</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="man0" title="Man 0"><span class="tool-icon">M0</span><span>Man 0</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="oneDeep" title="1 Deep"><span class="tool-icon">1D</span><span>1 Deep</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="cover2" title="Cover 2"><span class="tool-icon">C2</span><span>Cover 2</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="cover3" title="Cover 3"><span class="tool-icon">C3</span><span>Cover 3</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="boxZone" title="Box Zone"><span class="tool-icon">□</span><span>Box</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="goalLine" title="Goal Line"><span class="tool-icon">GL</span><span>Goal</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-defense-formation="prevent" title="Prevent"><span class="tool-icon">P</span><span>Prevent</span></button>
+        <button class="dock-action-button mobile-formation-button" type="button" data-action="toggle-defense-visible" title="Hide or show defense"><span class="tool-icon">D</span><span>Hide D</span></button>
+      </div>
+      <div class="mobile-action-row" role="group" aria-label="Edit actions">
+        <button class="dock-action-button mobile-full-button" type="button" data-action="toggle-fullscreen" title="Toggle fullscreen"><span class="tool-icon">⬜</span><span>Full</span></button>
+        <button class="tool-button is-active" type="button" data-tool="select" title="Select"><span class="tool-icon">↖</span><span>Select</span></button>
+        <button class="dock-action-button danger mobile-delete-button" type="button" data-action="delete-selected" title="Delete selected line or comment" disabled hidden><span class="tool-icon">⌫</span><span>Delete</span></button>
+        <button class="dock-action-button mobile-panel-button" type="button" data-action="toggle-mobile-draw-panel" title="Line tools"><span class="tool-icon">✎</span><span>Lines</span></button>
+        <button class="dock-action-button mobile-undo-button" type="button" data-action="undo-history" title="Undo" aria-disabled="true"><span class="tool-icon">↶</span><span>Undo</span></button>
+        <button class="dock-action-button mobile-redo-button" type="button" data-action="redo-history" title="Redo" aria-disabled="true"><span class="tool-icon">↷</span><span>Redo</span></button>
+        <button class="dock-action-button" type="button" data-action="flip-play" title="Flip horizontally"><span class="tool-icon">⇄</span><span>Flip</span></button>
+        <button class="dock-action-button danger mobile-reset-button" type="button" data-action="reset-play-diagram" title="Reset play diagram" disabled><span class="tool-icon">↺</span><span>Reset</span></button>
+        <button class="dock-action-button mobile-panel-button" type="button" data-action="toggle-mobile-offense-panel" title="Offense formations"><span class="tool-icon">O</span><span>Off</span></button>
+        <button class="dock-action-button mobile-panel-button" type="button" data-action="toggle-mobile-defense-panel" title="Defense formations"><span class="tool-icon">D</span><span>Def</span></button>
+      </div>
+    </nav>
+    <div id="printBook" class="print-book" aria-hidden="true"></div>
+
+    <script src="js/config.js?v=20260507-brand1"></script>
+    <script src="js/model.js?v=20260507-lines1"></script>
+    <script src="js/playbook-tree.js?v=20260507-endcap1"></script>
+    <script src="js/drawing.js?v=20260507-arrow1"></script>
+    <script src="js/field-interactions.js?v=20260507-anchor1"></script>
+    <script src="js/files.js?v=20260507-brand1"></script>
+    <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
+    <script src="js/main.js?v=20260507-lines1"></script>
+  </body>
+</html>
