@@ -174,9 +174,6 @@ function bindTouchFriendlyCommand(selector, handler) {
 
 bindTouchFriendlyCommand('[data-action="undo-history"]', undoCommand);
 bindTouchFriendlyCommand('[data-action="redo-history"]', redoCommand);
-bindTouchFriendlyCommand('[data-action="focus-zoom-out"]', focusZoomOut);
-bindTouchFriendlyCommand('[data-action="focus-zoom-reset"]', resetFocusZoom);
-bindTouchFriendlyCommand('[data-action="focus-zoom-in"]', focusZoomIn);
 bindTouchFriendlyCommand('[data-action="clear-routes"]', clearRoutes);
 bindTouchFriendlyCommand('[data-action="reset-play-diagram"]', resetPlayDiagram);
 bindTouchFriendlyCommand('[data-action="set-qb-setback"]', () => setQbDepth(2, 'Setback'));
@@ -528,33 +525,10 @@ function syncFullscreenButtons() {
   });
   syncFocusDockMinimizeButton();
   syncMobileCornerMinimizeButton();
-  syncFocusZoomButtons();
 }
 
 function focusZoomPercent() {
   return `${Math.round(focusZoom * 100)}%`;
-}
-
-function syncFocusZoomButtons() {
-  const active = isFocusMode();
-  const canZoomOut = active && focusZoom > FOCUS_ZOOM_MIN + 0.01;
-  const canZoomIn = active && focusZoom < FOCUS_ZOOM_MAX - 0.01;
-  document.querySelectorAll('[data-action="focus-zoom-out"]').forEach((button) => {
-    button.disabled = !canZoomOut;
-    button.title = active ? 'Zoom out' : 'Use Fullscreen to zoom';
-  });
-  document.querySelectorAll('[data-action="focus-zoom-in"]').forEach((button) => {
-    button.disabled = !canZoomIn;
-    button.title = active ? 'Zoom in' : 'Use Fullscreen to zoom';
-  });
-  document.querySelectorAll('[data-action="focus-zoom-reset"]').forEach((button) => {
-    button.disabled = !active;
-    button.title = active ? 'Reset zoom' : 'Use Fullscreen to zoom';
-    const icon = button.querySelector('.tool-icon');
-    const label = button.querySelector('span:last-child');
-    if (icon) icon.textContent = focusZoomPercent();
-    if (label && label !== icon) label.textContent = 'Zoom';
-  });
 }
 
 function syncFocusDockMinimizeButton() {
@@ -732,7 +706,6 @@ function setFocusZoom(nextZoom, centerClientX = window.innerWidth / 2, centerCli
   const nextHeight = field.getBoundingClientRect().height || focusBaseFieldHeight || 1;
   wrap.scrollLeft = fieldLeft + ratioX * nextWidth - (centerClientX - wrapRect.left);
   wrap.scrollTop = fieldTop + ratioY * nextHeight - (centerClientY - wrapRect.top);
-  syncFocusZoomButtons();
 }
 
 function changeFocusZoom(multiplier, centerClientX = window.innerWidth / 2, centerClientY = window.innerHeight / 2) {
@@ -767,7 +740,6 @@ function clearFocusFieldSize() {
   focusBaseFieldHeight = 0;
   field.style.removeProperty('--focus-field-width');
   field.style.removeProperty('--focus-field-height');
-  syncFocusZoomButtons();
 }
 
 function centerFocusCanvas() {
@@ -775,10 +747,14 @@ function centerFocusCanvas() {
   if (!wrap) return;
   const maxLeft = Math.max(0, wrap.scrollWidth - wrap.clientWidth);
   const maxTop = Math.max(0, wrap.scrollHeight - wrap.clientHeight);
-  const fieldHeight = field.getBoundingClientRect().height || wrap.scrollHeight;
-  const playCenterY = fieldHeight * 0.62;
-  wrap.scrollLeft = maxLeft / 2;
-  wrap.scrollTop = clamp(playCenterY - wrap.clientHeight * 0.52, 0, maxTop);
+  const wrapRect = wrap.getBoundingClientRect();
+  const fieldRect = field.getBoundingClientRect();
+  const fieldLeft = wrap.scrollLeft + fieldRect.left - wrapRect.left;
+  const fieldTop = wrap.scrollTop + fieldRect.top - wrapRect.top;
+  const fieldWidth = fieldRect.width || wrap.scrollWidth;
+  const fieldHeight = fieldRect.height || wrap.scrollHeight;
+  wrap.scrollLeft = clamp(fieldLeft + fieldWidth / 2 - wrap.clientWidth / 2, 0, maxLeft);
+  wrap.scrollTop = clamp(fieldTop + fieldHeight * 0.62 - wrap.clientHeight * 0.52, 0, maxTop);
 }
 
 function placeFocusDockDefault() {
