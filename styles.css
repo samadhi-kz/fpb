@@ -1145,6 +1145,11 @@ body.is-focus-mode .mobile-corner-actions .mobile-export-row[hidden] {
   display: none;
 }
 
+body.is-focus-mode .mobile-corner-actions .mobile-export-row [data-action="mobile-load-json"],
+body.is-focus-mode .mobile-corner-actions .mobile-export-row [data-action="mobile-add-json"] {
+  display: none;
+}
+
 body.is-focus-mode .mobile-playbook-list,
 body.is-focus-mode .mobile-book-section,
 body.is-focus-mode .mobile-book-folder,
