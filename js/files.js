@@ -450,13 +450,115 @@ function selectShareCopyText(area) {
   area.setSelectionRange(0, area.value.length);
 }
 
-function shareTextFileName(title, label) {
-  return `${safeFileBase(title || label || 'book-link', 'book-link')}-url.txt`;
+function shareOpenHtmlFileName(title, label) {
+  return `${safeFileBase(title || label || 'book-link', 'book-link')}-open.html`;
 }
 
-function downloadShareUrlTextFile(shareUrl, filename) {
-  const blob = new Blob([`${shareUrl}\n`], { type: 'text/plain;charset=utf-8' });
-  downloadBlob(blob, filename);
+function jsonForHtmlScript(value) {
+  return JSON.stringify(String(value))
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
+function createShareOpenHtml(shareUrl, title, label) {
+  const safeUrl = escapeHtml(shareUrl);
+  const safeTitle = escapeHtml(title || label || 'Flag Play Board');
+  return `<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="0; url=${safeUrl}">
+    <title>${safeTitle}</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #eef3f8;
+        color: #111827;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      main {
+        width: min(440px, 100%);
+        display: grid;
+        gap: 14px;
+        text-align: center;
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      p {
+        margin: 0;
+        color: #687386;
+        line-height: 1.6;
+      }
+      a {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background: #0a84ff;
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Flag Play Board</h1>
+      <p>Book Linkを開いています。自動で開かない場合は下のボタンを押してください。</p>
+      <a href="${safeUrl}">Open Book</a>
+    </main>
+    <script>
+      window.location.replace(${jsonForHtmlScript(shareUrl)});
+    </script>
+  </body>
+</html>
+`;
+}
+
+async function saveShareOpenHtml(shareUrl, title, label, filename) {
+  const html = createShareOpenHtml(shareUrl, title, label);
+  const htmlFileName = filename || shareOpenHtmlFileName(title, label);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+
+  if (typeof File === 'function' && navigator.canShare && navigator.share) {
+    const file = new File([blob], htmlFileName, { type: 'text/html' });
+    let canShareFile = false;
+    try {
+      canShareFile = navigator.canShare({ files: [file] });
+    } catch (error) {
+      console.warn('HTML file sharing is not available.', error);
+    }
+    if (canShareFile) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: title || label || 'Flag Play Board',
+          text: 'Flag Play Board Book Link'
+        });
+        setStatus(`${label} HTML Shared (${shareUrl.length})`);
+        return true;
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          setStatus('Cancelled');
+          return false;
+        }
+        console.warn('Native HTML share failed; downloading file.', error);
+      }
+    }
+  }
+
+  downloadBlob(blob, htmlFileName);
+  setStatus(`${label} HTML Saved (${shareUrl.length})`);
+  return true;
 }
 
 function showManualShareLink(label, shareUrl, options = {}) {
@@ -478,7 +580,7 @@ function showManualShareLink(label, shareUrl, options = {}) {
 
   const hint = document.createElement('p');
   hint.textContent = options.longWarning
-    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Copyするか、Save TXTでテキストファイルとして保存できます。'
+    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Save HTMLでタップして開けるファイルとして共有できます。'
     : 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
 
   const area = document.createElement('textarea');
@@ -500,18 +602,29 @@ function showManualShareLink(label, shareUrl, options = {}) {
   copyButton.type = 'button';
   copyButton.textContent = 'Copy';
 
-  const saveTextButton = document.createElement('button');
-  saveTextButton.className = 'wide-button';
-  saveTextButton.type = 'button';
-  saveTextButton.textContent = 'Save TXT';
+  const saveHtmlButton = document.createElement('button');
+  saveHtmlButton.className = 'wide-button';
+  saveHtmlButton.type = 'button';
+  saveHtmlButton.textContent = 'Save HTML';
 
   const close = () => overlay.remove();
 
   closeButton.addEventListener('click', close);
-  saveTextButton.addEventListener('click', () => {
-    downloadShareUrlTextFile(shareUrl, options.textFileName || shareTextFileName(options.title, label));
-    setStatus(`${label} TXT Saved (${shareUrl.length})`);
-    close();
+  saveHtmlButton.addEventListener('click', async () => {
+    saveHtmlButton.disabled = true;
+    saveHtmlButton.textContent = 'Saving...';
+    const saved = await saveShareOpenHtml(
+      shareUrl,
+      options.title,
+      label,
+      options.htmlFileName || shareOpenHtmlFileName(options.title, label)
+    );
+    if (saved) {
+      close();
+      return;
+    }
+    saveHtmlButton.disabled = false;
+    saveHtmlButton.textContent = 'Save HTML';
   });
   copyButton.addEventListener('click', async () => {
     if (await copyText(shareUrl)) {
@@ -532,7 +645,7 @@ function showManualShareLink(label, shareUrl, options = {}) {
   });
 
   actions.append(closeButton);
-  if (options.includeTextDownload) actions.append(saveTextButton);
+  if (options.includeHtmlDownload) actions.append(saveHtmlButton);
   actions.append(copyButton);
   dialog.append(title, hint, area, actions);
   overlay.append(dialog);
@@ -544,9 +657,9 @@ async function deliverShareUrl(shareUrl, title, label, options = {}) {
   const shouldCopyAfterWarning = options.warnIfLong && shareUrl.length >= LONG_SHARE_URL_WARNING_LENGTH;
   if (shouldCopyAfterWarning) {
     showManualShareLink(label, shareUrl, {
-      includeTextDownload: true,
+      includeHtmlDownload: true,
       longWarning: true,
-      textFileName: shareTextFileName(title, label),
+      htmlFileName: shareOpenHtmlFileName(title, label),
       title
     });
     setStatus(`${label} Ready (${shareUrl.length})`);
