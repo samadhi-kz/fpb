@@ -1858,8 +1858,9 @@ body.is-focus-mode .mobile-book-inline-actions {
 }
 
 body.is-focus-mode .mobile-book-control-button {
-  min-width: 30px;
+  min-width: 48px;
   min-height: 34px;
+  padding: 0 7px;
   border: 1px solid rgba(0, 104, 95, .16);
   border-radius: 7px;
   background: rgba(255, 255, 255, .68);
@@ -3039,8 +3040,9 @@ body.is-focus-mode .mobile-full-button .tool-icon {
   }
 
   .mobile-book-control-button {
-    min-width: 30px;
+    min-width: 48px;
     min-height: 34px;
+    padding: 0 7px;
     border: 1px solid rgba(0, 104, 95, .16);
     border-radius: 7px;
     background: rgba(255, 255, 255, .68);
@@ -3579,9 +3581,24 @@ body.is-focus-mode .mobile-full-button .tool-icon {
     background: #172033;
   }
 
+  body.is-focus-mode .mobile-corner-stack {
+    grid-template-columns: repeat(3, 58px);
+  }
+
+  body.is-mobile-plays-open .mobile-book-tree-section,
+  body.is-mobile-tree-open .mobile-book-plays-section {
+    display: none;
+  }
+
+  .mobile-action-row .mobile-full-button,
+  body.is-focus-mode .mobile-action-row .mobile-full-button {
+    display: none;
+  }
+
+  body.is-focus-mode .mobile-corner-actions,
   body.is-focus-mode .mobile-dock {
     border-color: rgba(255, 255, 255, .28);
-    background: rgba(238, 245, 247, .84);
+    background: rgba(18, 28, 44, .88);
     box-shadow: 0 18px 44px rgba(3, 12, 24, .38);
   }
 

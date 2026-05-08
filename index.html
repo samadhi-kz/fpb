@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Flag Play Board">
     <title>Flag Play Board</title>
-    <link rel="stylesheet" href="styles.css?v=20260508-mobile-full1">
+    <link rel="stylesheet" href="styles.css?v=20260508-mobile-only-full1">
   </head>
   <body>
     <main class="app-shell">
@@ -264,7 +264,8 @@
         <button class="mobile-corner-minimize" type="button" data-action="toggle-corner-minimized" aria-label="Minimize book tools" title="Minimize book tools">−</button>
       </div>
       <div class="mobile-corner-stack" role="group" aria-label="Book and export">
-        <button class="mobile-corner-button" type="button" data-action="toggle-mobile-book-panel" title="Playbook"><span class="tool-icon">☰</span><span>Book</span></button>
+        <button class="mobile-corner-button" type="button" data-action="toggle-mobile-plays-panel" title="Play thumbnails"><span class="tool-icon">▦</span><span>Plays</span></button>
+        <button class="mobile-corner-button" type="button" data-action="toggle-mobile-tree-panel" title="Playbook tree"><span class="tool-icon">☰</span><span>Tree</span></button>
         <button class="mobile-corner-button" type="button" data-action="toggle-mobile-export-panel" title="Export"><span class="tool-icon">⇩</span><span>Export</span></button>
       </div>
       <div class="mobile-book-row" role="group" aria-label="Mobile playbook" hidden>
@@ -372,11 +373,11 @@
 
     <script src="js/config.js?v=20260508-overview3"></script>
     <script src="js/model.js?v=20260508-overview3"></script>
-    <script src="js/playbook-tree.js?v=20260508-overview3"></script>
+    <script src="js/playbook-tree.js?v=20260508-mobile-book-split1"></script>
     <script src="js/drawing.js?v=20260508-overview1"></script>
     <script src="js/field-interactions.js?v=20260508-overview1"></script>
     <script src="js/files.js?v=20260508-share6"></script>
-    <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
-    <script src="js/main.js?v=20260508-mobile-full1"></script>
+    <script src="js/playbook-actions.js?v=20260508-book-actions1"></script>
+    <script src="js/main.js?v=20260508-mobile-only-full1"></script>
   </body>
 </html>

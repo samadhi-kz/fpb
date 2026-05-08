@@ -197,6 +197,8 @@ bindTouchFriendlyCommand('[data-action="toggle-mobile-draw-panel"]', toggleMobil
 bindTouchFriendlyCommand('[data-action="toggle-mobile-offense-panel"]', toggleMobileOffensePanel);
 bindTouchFriendlyCommand('[data-action="toggle-mobile-defense-panel"]', toggleMobileDefensePanel);
 bindTouchFriendlyCommand('[data-action="toggle-mobile-book-panel"]', toggleMobileBookPanel);
+bindTouchFriendlyCommand('[data-action="toggle-mobile-plays-panel"]', toggleMobilePlaysPanel);
+bindTouchFriendlyCommand('[data-action="toggle-mobile-tree-panel"]', toggleMobileTreePanel);
 bindTouchFriendlyCommand('[data-action="toggle-mobile-export-panel"]', toggleMobileExportPanel);
 bindTouchFriendlyCommand('[data-action="mobile-load-json"]', openPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-add-json"]', openAddPlaysetFile);
@@ -604,6 +606,10 @@ document.addEventListener('keydown', (event) => {
       return;
     }
     if (isFocusMode()) {
+      if (isMobileLayout()) {
+        setStatus('Full Mode');
+        return;
+      }
       setFocusMode(false);
       return;
     }
@@ -716,7 +722,9 @@ function syncMobileDockPanels() {
   const drawOpen = document.body.classList.contains('is-mobile-draw-open');
   const offenseOpen = document.body.classList.contains('is-mobile-offense-open');
   const defenseOpen = document.body.classList.contains('is-mobile-defense-open');
-  const bookOpen = document.body.classList.contains('is-mobile-book-open');
+  const playsOpen = document.body.classList.contains('is-mobile-plays-open');
+  const treeOpen = document.body.classList.contains('is-mobile-tree-open');
+  const bookOpen = playsOpen || treeOpen || document.body.classList.contains('is-mobile-book-open');
   const exportOpen = document.body.classList.contains('is-mobile-export-open');
   document.querySelectorAll('.mobile-draw-row').forEach((row) => {
     row.hidden = !drawOpen;
@@ -756,6 +764,14 @@ function syncMobileDockPanels() {
     button.classList.toggle('is-active', bookOpen);
     button.setAttribute('aria-pressed', String(bookOpen));
   });
+  document.querySelectorAll('[data-action="toggle-mobile-plays-panel"]').forEach((button) => {
+    button.classList.toggle('is-active', playsOpen);
+    button.setAttribute('aria-pressed', String(playsOpen));
+  });
+  document.querySelectorAll('[data-action="toggle-mobile-tree-panel"]').forEach((button) => {
+    button.classList.toggle('is-active', treeOpen);
+    button.setAttribute('aria-pressed', String(treeOpen));
+  });
   document.querySelectorAll('[data-action="toggle-mobile-export-panel"]').forEach((button) => {
     button.classList.toggle('is-active', exportOpen);
     button.setAttribute('aria-pressed', String(exportOpen));
@@ -764,12 +780,15 @@ function syncMobileDockPanels() {
 }
 
 function setMobileDockPanel(panel) {
-  if (panel && panel !== 'book' && panel !== 'export') document.body.classList.remove('is-dock-minimized');
-  if (panel === 'book' || panel === 'export') document.body.classList.remove('is-corner-minimized');
+  const cornerPanel = panel === 'book' || panel === 'plays' || panel === 'tree' || panel === 'export';
+  if (panel && !cornerPanel) document.body.classList.remove('is-dock-minimized');
+  if (cornerPanel) document.body.classList.remove('is-corner-minimized');
   document.body.classList.toggle('is-mobile-draw-open', panel === 'draw');
   document.body.classList.toggle('is-mobile-offense-open', panel === 'offense');
   document.body.classList.toggle('is-mobile-defense-open', panel === 'defense');
   document.body.classList.toggle('is-mobile-book-open', panel === 'book');
+  document.body.classList.toggle('is-mobile-plays-open', panel === 'plays');
+  document.body.classList.toggle('is-mobile-tree-open', panel === 'tree');
   document.body.classList.toggle('is-mobile-export-open', panel === 'export');
   syncFocusDockMinimizeButton();
   syncMobileDockPanels();
@@ -799,6 +818,16 @@ function toggleMobileDefensePanel() {
 
 function toggleMobileBookPanel() {
   const nextPanel = document.body.classList.contains('is-mobile-book-open') ? '' : 'book';
+  setMobileDockPanel(nextPanel);
+}
+
+function toggleMobilePlaysPanel() {
+  const nextPanel = document.body.classList.contains('is-mobile-plays-open') ? '' : 'plays';
+  setMobileDockPanel(nextPanel);
+}
+
+function toggleMobileTreePanel() {
+  const nextPanel = document.body.classList.contains('is-mobile-tree-open') ? '' : 'tree';
   setMobileDockPanel(nextPanel);
 }
 
@@ -960,6 +989,10 @@ function toggleFocusDockMinimized() {
 }
 
 function toggleFullscreen() {
+  if (isMobileLayout() && isFocusMode()) {
+    setStatus('Full Mode');
+    return;
+  }
   setFocusMode(!isFocusMode());
 }
 
