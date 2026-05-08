@@ -842,6 +842,10 @@ select {
   white-space: nowrap;
 }
 
+.marks-panel {
+  display: none;
+}
+
 .mark-list {
   display: grid;
   gap: 8px;
@@ -904,6 +908,47 @@ select {
   border-radius: 0;
   background: var(--teal);
   color: #fff;
+}
+
+.mobile-play-preview-card,
+.mobile-play-preview-folder-label,
+.mobile-play-preview-empty,
+.mobile-play-preview-folder-grid {
+  position: relative;
+}
+
+.mobile-play-preview-card.is-mobile-preview-dragging {
+  opacity: .72;
+  transform: scale(.99);
+}
+
+.mobile-play-preview-card.is-mobile-drop-before::before,
+.mobile-play-preview-card.is-mobile-drop-after::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--teal);
+  box-shadow: 0 0 0 2px rgba(0, 104, 95, .14);
+}
+
+.mobile-play-preview-card.is-mobile-drop-before::before {
+  left: -4px;
+}
+
+.mobile-play-preview-card.is-mobile-drop-after::after {
+  right: -4px;
+}
+
+.mobile-play-preview-folder-label.is-mobile-drop-into,
+.mobile-play-preview-empty.is-mobile-drop-into,
+.mobile-play-preview-folder-grid.is-mobile-drop-into {
+  border-color: var(--blue);
+  background: #edf4ff;
+  color: #174ea6;
+  outline: 2px solid rgba(47, 111, 237, .18);
 }
 
 .workspace {
@@ -2412,19 +2457,19 @@ body.is-focus-mode .mobile-full-button .tool-icon {
     order: 5;
   }
 
-  .notes-panel {
+  .marks-panel {
     order: 6;
   }
 
-  .marks-panel {
+  .playbook-panel {
     order: 7;
   }
 
-  .playbook-panel {
+  .playset-panel {
     order: 8;
   }
 
-  .playset-panel {
+  .notes-panel {
     order: 9;
   }
 

@@ -299,6 +299,7 @@ const state = {
   suppressMobileBookClick: false,
   previewDrag: null,
   suppressPreviewClick: false,
+  mobilePreviewDrag: null,
   bookOverviewOpen: false,
   pendingPreset: null,
   printCleanup: null,
