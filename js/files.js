@@ -31,6 +31,8 @@ const PLAY_SHARE_PREFIX_GZIP = 'p1z.';
 const BOOK_SHARE_HASH_KEY = 'book';
 const BOOK_SHARE_PREFIX_RAW = 'b1.';
 const BOOK_SHARE_PREFIX_GZIP = 'b1z.';
+const BOOK_IMPORT_QUERY_KEY = 'fpbImport';
+const BOOK_IMPORT_MESSAGE_TYPE = 'fpb:book-import';
 const LONG_SHARE_URL_WARNING_LENGTH = 4000;
 
 function downloadBlob(blob, filename) {
@@ -406,6 +408,22 @@ function currentPageUrlWithoutHash() {
   return url.toString();
 }
 
+function currentPageImportUrl(nonce) {
+  const url = new URL(currentPageUrlWithoutHash());
+  url.searchParams.set(BOOK_IMPORT_QUERY_KEY, nonce);
+  return url.toString();
+}
+
+function makeBookImportNonce() {
+  if (crypto?.randomUUID) return crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (crypto?.getRandomValues) {
+    crypto.getRandomValues(bytes);
+    return bytesToBase64Url(bytes);
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function shouldUseNativeLinkShare() {
   return Boolean(navigator.share)
     && (isAppleTouchDevice() || navigator.maxTouchPoints > 1 || /Android/i.test(navigator.userAgent));
@@ -454,6 +472,15 @@ function shareOpenHtmlFileName(title, label) {
   return `${safeFileBase(title || label || 'book-link', 'book-link')}-open.html`;
 }
 
+function shareUrlTextFileName(title, label) {
+  return `${safeFileBase(title || label || 'book-link', 'book-link')}-url.txt`;
+}
+
+function downloadShareUrlTextFile(shareUrl, filename) {
+  const blob = new Blob([`${shareUrl}\n`], { type: 'text/plain;charset=utf-8' });
+  downloadBlob(blob, filename);
+}
+
 function jsonForHtmlScript(value) {
   return JSON.stringify(String(value))
     .replace(/</g, '\\u003c')
@@ -473,8 +500,13 @@ function jsonChunksForHtmlScript(value) {
   return chunks.join(',\n        ');
 }
 
-function createShareOpenHtml(shareUrl, title, label) {
+function createShareOpenHtml(shareUrl, title, label, options = {}) {
+  const importUrl = options.importUrl || shareUrl;
+  const bookToken = options.bookToken || '';
+  const importNonce = options.importNonce || '';
+  const canImportByMessage = Boolean(bookToken && importNonce && importUrl);
   const safeUrl = escapeHtml(shareUrl);
+  const safeOpenUrl = escapeHtml(canImportByMessage ? importUrl : shareUrl);
   const safeTitle = escapeHtml(title || label || 'Flag Play Board');
   return `<!doctype html>
 <html lang="ja">
@@ -543,25 +575,64 @@ function createShareOpenHtml(shareUrl, title, label) {
   <body>
     <main>
       <h1>Flag Play Board</h1>
-      <p>スマホでは自動でBookを開きます。PCで開かない場合はOpen Bookを押してください。</p>
-      <a id="openBookButton" href="${safeUrl}" target="_blank" rel="noopener">Open Book</a>
-      <button id="copyBookButton" type="button">Copy Link</button>
+      <p>Open Bookを押すと、短いURLでアプリを開いてBookデータを読み込みます。</p>
+      <a id="openBookButton" href="${safeOpenUrl}" target="_blank">Open Book</a>
+      <button id="copyBookButton" type="button">Copy Long Link</button>
       <textarea id="bookUrl" readonly aria-label="Book Link">${safeUrl}</textarea>
     </main>
     <script>
-      const bookUrl = [
+      const fallbackBookUrl = [
         ${jsonChunksForHtmlScript(shareUrl)}
       ].join('');
+      const appUrl = [
+        ${jsonChunksForHtmlScript(importUrl)}
+      ].join('');
+      const bookToken = [
+        ${jsonChunksForHtmlScript(bookToken)}
+      ].join('');
+      const importNonce = ${jsonForHtmlScript(importNonce)};
+      const importMessageType = ${jsonForHtmlScript(BOOK_IMPORT_MESSAGE_TYPE)};
       const openBookButton = document.getElementById('openBookButton');
       const copyBookButton = document.getElementById('copyBookButton');
       const bookUrlText = document.getElementById('bookUrl');
+      const appOrigin = new URL(appUrl).origin;
+      const targetOrigin = appOrigin === 'null' ? '*' : appOrigin;
 
-      openBookButton.href = bookUrl;
-      bookUrlText.value = bookUrl;
+      openBookButton.href = ${canImportByMessage ? 'appUrl' : 'fallbackBookUrl'};
+      bookUrlText.value = fallbackBookUrl;
+
+      function sendBookTo(targetWindow) {
+        if (!bookToken || !importNonce || !targetWindow) return;
+        let attempts = 0;
+        const timer = window.setInterval(() => {
+          attempts += 1;
+          try {
+            targetWindow.postMessage({
+              type: importMessageType,
+              nonce: importNonce,
+              token: bookToken
+            }, targetOrigin);
+          } catch {
+            window.clearInterval(timer);
+          }
+          if (attempts >= 48) window.clearInterval(timer);
+        }, 250);
+      }
+
+      openBookButton.addEventListener('click', (event) => {
+        if (!bookToken || !importNonce) return;
+        event.preventDefault();
+        const targetWindow = window.open(appUrl, '_blank');
+        if (!targetWindow) {
+          copyBookButton.textContent = 'Pop-up Blocked';
+          return;
+        }
+        sendBookTo(targetWindow);
+      });
 
       copyBookButton.addEventListener('click', async () => {
         try {
-          await navigator.clipboard.writeText(bookUrl);
+          await navigator.clipboard.writeText(fallbackBookUrl);
           copyBookButton.textContent = 'Copied';
         } catch {
           bookUrlText.focus();
@@ -572,9 +643,9 @@ function createShareOpenHtml(shareUrl, title, label) {
       });
 
       const isTouchDevice = navigator.maxTouchPoints > 0 || /Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
-      if (isTouchDevice) {
+      if (isTouchDevice && !bookToken) {
         window.setTimeout(() => {
-          window.location.href = bookUrl;
+          window.location.href = fallbackBookUrl;
         }, 450);
       }
     </script>
@@ -583,8 +654,8 @@ function createShareOpenHtml(shareUrl, title, label) {
 `;
 }
 
-async function saveShareOpenHtml(shareUrl, title, label, filename) {
-  const html = createShareOpenHtml(shareUrl, title, label);
+async function saveShareOpenHtml(shareUrl, title, label, filename, options = {}) {
+  const html = createShareOpenHtml(shareUrl, title, label, options);
   const htmlFileName = filename || shareOpenHtmlFileName(title, label);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
 
@@ -639,7 +710,7 @@ function showManualShareLink(label, shareUrl, options = {}) {
 
   const hint = document.createElement('p');
   hint.textContent = options.longWarning
-    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Save HTMLでタップして開けるファイルとして共有できます。'
+    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Save HTMLで開く用ファイル、Save TXTでURLテキストを保存できます。'
     : 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
 
   const area = document.createElement('textarea');
@@ -666,6 +737,11 @@ function showManualShareLink(label, shareUrl, options = {}) {
   saveHtmlButton.type = 'button';
   saveHtmlButton.textContent = 'Save HTML';
 
+  const saveTextButton = document.createElement('button');
+  saveTextButton.className = 'wide-button';
+  saveTextButton.type = 'button';
+  saveTextButton.textContent = 'Save TXT';
+
   const close = () => overlay.remove();
 
   closeButton.addEventListener('click', close);
@@ -676,7 +752,8 @@ function showManualShareLink(label, shareUrl, options = {}) {
       shareUrl,
       options.title,
       label,
-      options.htmlFileName || shareOpenHtmlFileName(options.title, label)
+      options.htmlFileName || shareOpenHtmlFileName(options.title, label),
+      options
     );
     if (saved) {
       close();
@@ -684,6 +761,11 @@ function showManualShareLink(label, shareUrl, options = {}) {
     }
     saveHtmlButton.disabled = false;
     saveHtmlButton.textContent = 'Save HTML';
+  });
+  saveTextButton.addEventListener('click', () => {
+    downloadShareUrlTextFile(shareUrl, options.textFileName || shareUrlTextFileName(options.title, label));
+    setStatus(`${label} TXT Saved (${shareUrl.length})`);
+    close();
   });
   copyButton.addEventListener('click', async () => {
     if (await copyText(shareUrl)) {
@@ -705,6 +787,7 @@ function showManualShareLink(label, shareUrl, options = {}) {
 
   actions.append(closeButton);
   if (options.includeHtmlDownload) actions.append(saveHtmlButton);
+  if (options.includeTextDownload) actions.append(saveTextButton);
   actions.append(copyButton);
   dialog.append(title, hint, area, actions);
   overlay.append(dialog);
@@ -719,6 +802,11 @@ async function deliverShareUrl(shareUrl, title, label, options = {}) {
       includeHtmlDownload: true,
       longWarning: true,
       htmlFileName: shareOpenHtmlFileName(title, label),
+      includeTextDownload: true,
+      importNonce: options.importNonce,
+      importUrl: options.importUrl,
+      bookToken: options.bookToken,
+      textFileName: shareUrlTextFileName(title, label),
       title
     });
     setStatus(`${label} Ready (${shareUrl.length})`);
@@ -774,8 +862,15 @@ async function shareCurrentBookLink() {
     const playbook = playbookForBookLink(fileName);
     const token = await encodeBookSharePayload(playbook);
     const shareUrl = `${currentPageUrlWithoutHash()}#${BOOK_SHARE_HASH_KEY}=${token}`;
+    const importNonce = makeBookImportNonce();
+    const importUrl = currentPageImportUrl(importNonce);
     const bookName = fileName.replace(/\.json$/i, '') || activeFolder()?.name || 'Flag Play Board';
-    await deliverShareUrl(shareUrl, bookName, 'Book Link', { warnIfLong: true });
+    await deliverShareUrl(shareUrl, bookName, 'Book Link', {
+      warnIfLong: true,
+      importNonce,
+      importUrl,
+      bookToken: token
+    });
   } catch (error) {
     console.error(error);
     alert('Book Linkを作成できませんでした。Bookが大きい場合はJSON保存を使ってください。');
@@ -795,6 +890,66 @@ function sharedPlayTokenFromLocation() {
 
 function sharedBookTokenFromLocation() {
   return sharedTokenFromLocation(BOOK_SHARE_HASH_KEY);
+}
+
+function sharedBookImportNonceFromLocation() {
+  return new URL(window.location.href).searchParams.get(BOOK_IMPORT_QUERY_KEY) || '';
+}
+
+function applySharedBookPayload(sharedPayload, statusText = 'Shared Book Loaded') {
+  const playbook = normalizeImportedPlaybook(sharedPayload);
+  state.playbook = playbook;
+  state.activeFolderId = playbook.activeFolderId;
+  state.activePlayId = playbook.activePlayId;
+  state.fileHandle = null;
+  state.fileName = cleanPlaysetFileName(
+    sharedPayload?.fileName || playbook.folders?.[0]?.name || 'shared-book',
+    'shared-book'
+  );
+  state.openFolderIds = new Set(playbook.folders.map((folder) => folder.id));
+  const play = activePlay();
+  if (play) applyPlay(play);
+  else clearActivePlayView('No Play Selected');
+  saveLocal(false);
+  syncPlaysetFileBadge();
+  resetHistory();
+  setStatus(statusText);
+  return true;
+}
+
+async function loadSharedBookToken(token, statusText = 'Shared Book Loaded') {
+  const sharedPayload = await decodeBookSharePayload(token);
+  return applySharedBookPayload(sharedPayload, statusText);
+}
+
+let sharedBookMessageLoaded = false;
+
+function setupSharedBookMessageImport() {
+  const expectedNonce = sharedBookImportNonceFromLocation();
+  if (!expectedNonce) return;
+
+  window.addEventListener('message', async (event) => {
+    const data = event.data;
+    if (
+      sharedBookMessageLoaded
+      || !data
+      || data.type !== BOOK_IMPORT_MESSAGE_TYPE
+      || data.nonce !== expectedNonce
+      || typeof data.token !== 'string'
+    ) {
+      return;
+    }
+
+    sharedBookMessageLoaded = true;
+    try {
+      await loadSharedBookToken(data.token, 'Shared Book File Loaded');
+    } catch (error) {
+      sharedBookMessageLoaded = false;
+      console.error(error);
+      alert('Book HTMLを読み込めませんでした。ファイルを作り直してください。');
+      setStatus('Book HTML Load Failed');
+    }
+  });
 }
 
 async function loadSharedPlayFromUrl() {
@@ -828,25 +983,7 @@ async function loadSharedBookFromUrl() {
   const token = sharedBookTokenFromLocation();
   if (!token) return false;
   try {
-    const sharedPayload = await decodeBookSharePayload(token);
-    const playbook = normalizeImportedPlaybook(sharedPayload);
-    state.playbook = playbook;
-    state.activeFolderId = playbook.activeFolderId;
-    state.activePlayId = playbook.activePlayId;
-    state.fileHandle = null;
-    state.fileName = cleanPlaysetFileName(
-      sharedPayload?.fileName || playbook.folders?.[0]?.name || 'shared-book',
-      'shared-book'
-    );
-    state.openFolderIds = new Set(playbook.folders.map((folder) => folder.id));
-    const play = activePlay();
-    if (play) applyPlay(play);
-    else clearActivePlayView('No Play Selected');
-    saveLocal(false);
-    syncPlaysetFileBadge();
-    resetHistory();
-    setStatus('Shared Book Loaded');
-    return true;
+    return await loadSharedBookToken(token);
   } catch (error) {
     console.error(error);
     alert('Book Linkを読み込めませんでした。リンクが途中で切れている可能性があります。');
