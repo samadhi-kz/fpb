@@ -216,16 +216,24 @@ document.querySelectorAll('[data-action="flip-play"]').forEach((button) => {
   button.addEventListener('click', flipPlay);
 });
 document.querySelectorAll('[data-action="rename-active-folder"]').forEach((button) => {
-  button.addEventListener('click', () => renameFolderById());
+  button.addEventListener('click', () => {
+    if (state.bookOverviewOpen) return;
+    renameFolderById();
+  });
   button.addEventListener('keydown', (event) => {
+    if (state.bookOverviewOpen) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     renameFolderById();
   });
 });
 document.querySelectorAll('[data-action="rename-active-play"]').forEach((button) => {
-  button.addEventListener('click', () => renamePlayById());
+  button.addEventListener('click', () => {
+    if (state.bookOverviewOpen) return;
+    renamePlayById();
+  });
   button.addEventListener('keydown', (event) => {
+    if (state.bookOverviewOpen) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     renamePlayById();
@@ -237,10 +245,10 @@ document.querySelector('#savePlaysetAsBtn').addEventListener('click', savePlayse
 document.querySelector('#exportLoadJsonBtn').addEventListener('click', openPlaysetFile);
 document.querySelector('#exportAddJsonBtn').addEventListener('click', openAddPlaysetFile);
 document.querySelector('#exportJsonBtn').addEventListener('click', savePlaysetAs);
-document.querySelector('#sharePlayLinkBtn').addEventListener('click', shareCurrentPlayLink);
+controls.sharePlayLinkBtn?.addEventListener('click', shareTopbarLink);
 document.querySelector('#sharePlayLinkExportBtn').addEventListener('click', shareCurrentPlayLink);
 document.querySelector('#shareBookLinkExportBtn').addEventListener('click', shareCurrentBookLink);
-document.querySelector('#savePhotoBtn').addEventListener('click', savePhoto);
+document.querySelector('#savePhotoBtn')?.addEventListener('click', savePhoto);
 document.querySelector('#pdfCurrentBtn').addEventListener('click', exportCurrentPdf);
 document.querySelector('#pdfBookBtn').addEventListener('click', exportPlaybookPdf);
 controls.bookOverviewToggleBtn?.addEventListener('click', () => toggleBookOverview());
@@ -420,6 +428,22 @@ function syncBookOverviewView() {
   document.body.classList.toggle('is-book-overview-open', open);
   if (controls.bookOverview) controls.bookOverview.hidden = !open;
   if (controls.canvasWrap) controls.canvasWrap.hidden = open;
+  if (controls.folderLabel) {
+    const folderName = activeFolder()?.name || '';
+    controls.folderLabel.textContent = open ? 'Book List' : folderName;
+    controls.folderLabel.style.display = open || folderName ? 'block' : 'none';
+    controls.folderLabel.title = open ? 'Book list' : 'Rename playbook';
+  }
+  if (controls.titleLabel) {
+    controls.titleLabel.textContent = open ? state.fileName || 'Unsaved Playbook' : state.playName;
+    controls.titleLabel.title = open ? 'Current playbook file' : 'Rename play';
+    controls.titleLabel.setAttribute('aria-label', open ? 'Current playbook file' : 'Rename play');
+  }
+  if (controls.sharePlayLinkBtn) {
+    controls.sharePlayLinkBtn.textContent = open ? 'Book Link' : '1 Play Link';
+    controls.sharePlayLinkBtn.title = open ? 'Share full book link' : 'Share current play only';
+    controls.sharePlayLinkBtn.setAttribute('aria-label', open ? 'Share full book link' : 'Share current play only');
+  }
   if (controls.bookOverviewToggleBtn) {
     controls.bookOverviewToggleBtn.classList.toggle('is-active', open);
     controls.bookOverviewToggleBtn.setAttribute('aria-pressed', String(open));
@@ -442,6 +466,14 @@ function setBookOverviewOpen(open, options = {}) {
 
 function toggleBookOverview() {
   setBookOverviewOpen(!state.bookOverviewOpen);
+}
+
+function shareTopbarLink() {
+  if (state.bookOverviewOpen) {
+    shareCurrentBookLink();
+    return;
+  }
+  shareCurrentPlayLink();
 }
 
 function undoPolylinePoint() {

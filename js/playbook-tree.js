@@ -148,10 +148,12 @@ function previewPlayerFill(play, player, defender = false) {
   return player.role === 'qb' ? '#00685f' : '#008579';
 }
 
-function createMobilePlayPreviewSvg(play) {
+const BOOK_OVERVIEW_PREVIEW_VIEW_BOX = '110 90 780 561.6';
+
+function createMobilePlayPreviewSvg(play, options = {}) {
   const svg = svgEl('svg', {
     class: 'mobile-play-preview',
-    viewBox: '0 0 1000 720',
+    viewBox: options.viewBox || '0 0 1000 720',
     'aria-hidden': 'true'
   });
   svg.append(svgEl('rect', { class: 'mobile-preview-bg', x: 0, y: 0, width: 1000, height: 720 }));
@@ -265,7 +267,7 @@ function renderDesktopPlaybookPreview() {
       card.dataset.playId = play.id;
       card.title = `Open ${play.name || 'Untitled'}`;
       card.setAttribute('aria-label', `Open ${play.name || 'Untitled'}`);
-      card.append(createMobilePlayPreviewSvg(play));
+      card.append(createMobilePlayPreviewSvg(play, { viewBox: BOOK_OVERVIEW_PREVIEW_VIEW_BOX }));
       const name = document.createElement('span');
       name.className = 'playbook-preview-play-name';
       name.textContent = play.name || 'Untitled';
