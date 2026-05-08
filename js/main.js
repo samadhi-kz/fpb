@@ -358,25 +358,57 @@ function positionPlayerNumberPicker(clientX, clientY) {
 }
 
 function showPlayerNumberPicker(player, event = null) {
-  if (!controls.playerNumberPicker || !player || !canSwapPlayerNumber(player)) {
+  if (!controls.playerNumberPicker || !player) {
     hidePlayerNumberPicker();
     return;
+  }
+  const picker = controls.playerNumberPicker;
+  const canRename = canSwapPlayerNumber(player);
+  const selectedMark = playerMark(player);
+  const title = picker.querySelector('.player-picker-title');
+  const numberRow = picker.querySelector('.player-picker-number-row');
+  if (title) title.textContent = `No.${player.label}`;
+  if (numberRow) {
+    numberRow.hidden = !canRename;
+    numberRow.setAttribute('aria-hidden', String(!canRename));
   }
   controls.playerNumberPicker.dataset.playerId = player.id;
   controls.playerNumberPicker.querySelectorAll('[data-player-number]').forEach((button) => {
     const active = button.dataset.playerNumber === player.label;
+    button.disabled = !canRename;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  controls.playerNumberPicker.querySelectorAll('[data-player-mark]').forEach((button) => {
+    const active = button.dataset.playerMark === selectedMark;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
   });
   positionPlayerNumberPicker(event?.clientX || window.innerWidth / 2, event?.clientY || window.innerHeight / 2);
-  setStatus(`No.${player.label}`);
+  setStatus(canRename ? `No.${player.label} Options` : `No.${player.label} Shape`);
 }
 
 function handlePlayerNumberPickerClick(event) {
-  const button = event.target.closest('[data-player-number]');
-  if (!button || !controls.playerNumberPicker?.contains(button)) return;
+  const picker = controls.playerNumberPicker;
+  const button = event.target.closest('[data-player-number], [data-player-mark]');
+  if (!button || !picker?.contains(button)) return;
   const playerId = controls.playerNumberPicker.dataset.playerId;
-  renamePlayerById(playerId, button.dataset.playerNumber);
+  if (button.dataset.playerNumber) {
+    renamePlayerById(playerId, button.dataset.playerNumber);
+    hidePlayerNumberPicker();
+    return;
+  }
+
+  const player = state.players.find((item) => item.id === playerId);
+  const mark = button.dataset.playerMark;
+  if (!player || !PLAYER_MARK_VALUES.has(mark)) {
+    hidePlayerNumberPicker();
+    return;
+  }
+  setPlayerMark(player, mark);
+  saveLocal(false, { historyKey: `player-mark-${player.id}` });
+  render();
+  setStatus(`Player ${player.label}: ${markLabel(mark)}`);
   hidePlayerNumberPicker();
 }
 
@@ -644,6 +676,8 @@ function isFullViewActive() {
 function syncFullscreenButtons() {
   const active = isFullViewActive();
   document.querySelectorAll('[data-action="toggle-fullscreen"]').forEach((button) => {
+    button.classList.toggle('is-full-active', active);
+    button.setAttribute('aria-pressed', String(active));
     button.title = active ? 'Exit full view' : 'Full view';
     const label = button.querySelector('span:last-child');
     if (label && label !== button.querySelector('.tool-icon')) {

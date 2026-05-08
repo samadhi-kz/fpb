@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Flag Play Board">
     <title>Flag Play Board</title>
-    <link rel="stylesheet" href="styles.css?v=20260508-overview2">
+    <link rel="stylesheet" href="styles.css?v=20260508-mobile-full1">
   </head>
   <body>
     <main class="app-shell">
@@ -355,10 +355,19 @@
       </div>
     </nav>
     <div id="printBook" class="print-book" aria-hidden="true"></div>
-    <div id="playerNumberPicker" class="player-number-picker" role="group" aria-label="Player number" hidden>
-      <button type="button" data-player-number="3">3</button>
-      <button type="button" data-player-number="4">4</button>
-      <button type="button" data-player-number="5">5</button>
+    <div id="playerNumberPicker" class="player-number-picker" role="group" aria-label="Player options" hidden>
+      <div class="player-picker-title">No.</div>
+      <div class="player-picker-row player-picker-number-row" aria-label="Swap number">
+        <button type="button" data-player-number="3">3</button>
+        <button type="button" data-player-number="4">4</button>
+        <button type="button" data-player-number="5">5</button>
+      </div>
+      <div class="player-picker-row player-picker-mark-row" aria-label="Player shape">
+        <button class="player-picker-mark is-ring" type="button" data-player-mark="ring" aria-label="Blue circle">●</button>
+        <button class="player-picker-mark is-star" type="button" data-player-mark="star" aria-label="Red star">★</button>
+        <button class="player-picker-mark is-diamond" type="button" data-player-mark="diamond" aria-label="Yellow diamond">◆</button>
+        <button class="player-picker-mark is-square" type="button" data-player-mark="square" aria-label="Green square">■</button>
+      </div>
     </div>
 
     <script src="js/config.js?v=20260508-overview3"></script>
@@ -368,6 +377,6 @@
     <script src="js/field-interactions.js?v=20260508-overview1"></script>
     <script src="js/files.js?v=20260508-share6"></script>
     <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
-    <script src="js/main.js?v=20260508-overview3"></script>
+    <script src="js/main.js?v=20260508-mobile-full1"></script>
   </body>
 </html>

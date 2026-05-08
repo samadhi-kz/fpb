@@ -1157,11 +1157,13 @@ select {
 .player-number-picker {
   position: fixed;
   z-index: 80;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto auto;
   gap: 6px;
-  padding: 6px;
+  align-items: center;
+  padding: 7px;
   border: 1px solid rgba(10, 132, 255, .26);
-  border-radius: 999px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, .9);
   box-shadow: 0 14px 36px rgba(30, 42, 60, .18), inset 0 1px 0 rgba(255, 255, 255, .9);
   -webkit-backdrop-filter: blur(18px) saturate(1.16);
@@ -1169,6 +1171,24 @@ select {
 }
 
 .player-number-picker[hidden] {
+  display: none;
+}
+
+.player-picker-title {
+  min-width: 44px;
+  padding: 0 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.player-picker-row {
+  display: flex;
+  gap: 5px;
+}
+
+.player-picker-row[hidden] {
   display: none;
 }
 
@@ -1189,6 +1209,43 @@ select {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
+}
+
+.player-number-picker button:disabled {
+  cursor: default;
+  opacity: .42;
+}
+
+.player-number-picker .player-picker-mark.is-ring {
+  border-color: var(--blue);
+  background: #fff;
+  color: var(--blue);
+}
+
+.player-number-picker .player-picker-mark.is-star {
+  border-color: var(--red);
+  background: #fff1f3;
+  color: var(--red);
+}
+
+.player-number-picker .player-picker-mark.is-diamond {
+  border-color: rgba(243, 180, 63, .65);
+  background: #fff8e8;
+  color: #996b00;
+}
+
+.player-number-picker .player-picker-mark.is-square {
+  border-color: rgba(0, 133, 121, .5);
+  border-radius: 10px;
+  background: #e8f4f2;
+  color: var(--teal-dark);
+}
+
+.player-number-picker .player-picker-mark.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .42);
 }
 
 .mobile-corner-actions,
@@ -3498,6 +3555,49 @@ body.is-focus-mode .mobile-full-button .tool-icon {
 .share-copy-actions .wide-button {
   flex: 0 0 auto;
   min-width: 92px;
+}
+
+@media (max-width: 860px), (hover: none) and (pointer: coarse) and (max-width: 1366px) {
+  body:not(.is-focus-mode) .mobile-action-row .mobile-full-button {
+    border-color: rgba(10, 132, 255, .24);
+    background: rgba(255, 255, 255, .86);
+    color: var(--accent-dark);
+    box-shadow: var(--control-shadow);
+  }
+
+  body:not(.is-focus-mode) .mobile-action-row .mobile-full-button .tool-icon {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+  }
+
+  body.is-focus-mode {
+    background: #172033;
+  }
+
+  body.is-focus-mode .workspace,
+  body.is-focus-mode .canvas-wrap {
+    background: #172033;
+  }
+
+  body.is-focus-mode .mobile-dock {
+    border-color: rgba(255, 255, 255, .28);
+    background: rgba(238, 245, 247, .84);
+    box-shadow: 0 18px 44px rgba(3, 12, 24, .38);
+  }
+
+  body.is-focus-mode .mobile-action-row .mobile-full-button,
+  .mobile-action-row .mobile-full-button.is-full-active {
+    border-color: #00685f;
+    background: #00685f;
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(0, 104, 95, .32), inset 0 1px 0 rgba(255, 255, 255, .24);
+  }
+
+  body.is-focus-mode .mobile-action-row .mobile-full-button .tool-icon,
+  .mobile-action-row .mobile-full-button.is-full-active .tool-icon {
+    background: rgba(255, 255, 255, .2);
+    color: #fff;
+  }
 }
 
 @media print {
