@@ -205,6 +205,7 @@ function createMobilePlayPreviewSvg(play) {
 }
 
 function focusSelectedPlayForEditing() {
+  if (typeof setBookOverviewOpen === 'function') setBookOverviewOpen(false, { quiet: true });
   if (typeof setMobileDockPanel === 'function') setMobileDockPanel('');
   if (document.body.classList.contains('is-focus-mode') && typeof centerFocusCanvas === 'function') {
     window.requestAnimationFrame(() => centerFocusCanvas());
@@ -214,6 +215,10 @@ function focusSelectedPlayForEditing() {
 function renderDesktopPlaybookPreview() {
   if (!controls.playbookPreview) return;
   controls.playbookPreview.replaceChildren();
+  if (controls.bookOverviewCount) {
+    const playCount = state.playbook.folders.reduce((total, folder) => total + folder.plays.length, 0);
+    controls.bookOverviewCount.textContent = `${state.playbook.folders.length} Folder / ${playCount} Play`;
+  }
 
   state.playbook.folders.forEach((folder) => {
     const isActiveFolder = folder.id === state.activeFolderId;
@@ -258,8 +263,8 @@ function renderDesktopPlaybookPreview() {
       card.dataset.dragKind = 'play';
       card.dataset.folderId = folder.id;
       card.dataset.playId = play.id;
-      card.title = `Load ${play.name || 'Untitled'}`;
-      card.setAttribute('aria-label', `Load ${play.name || 'Untitled'}`);
+      card.title = `Open ${play.name || 'Untitled'}`;
+      card.setAttribute('aria-label', `Open ${play.name || 'Untitled'}`);
       card.append(createMobilePlayPreviewSvg(play));
       const name = document.createElement('span');
       name.className = 'playbook-preview-play-name';
@@ -1065,7 +1070,10 @@ function handlePlaybookPreviewClick(event) {
   if (!button || !controls.playbookPreview?.contains(button)) return;
   const { previewAction, folderId, playId } = button.dataset;
   if (previewAction === 'select-folder') selectFolder(folderId);
-  if (previewAction === 'select-play') selectPlay(folderId, playId);
+  if (previewAction === 'select-play') {
+    selectPlay(folderId, playId);
+    focusSelectedPlayForEditing();
+  }
 }
 
 function handlePlaybookTreeDragStart(event) {

@@ -24,6 +24,8 @@ function syncToolButtons() {
 
 document.querySelectorAll('.tool-button').forEach((button) => {
   button.addEventListener('click', () => {
+    hidePlayerNumberPicker();
+    if (state.bookOverviewOpen) setBookOverviewOpen(false, { quiet: true });
     state.tool = button.dataset.tool;
     state.pendingPreset = null;
     if (state.tool !== 'select') {
@@ -241,6 +243,14 @@ document.querySelector('#shareBookLinkExportBtn').addEventListener('click', shar
 document.querySelector('#savePhotoBtn').addEventListener('click', savePhoto);
 document.querySelector('#pdfCurrentBtn').addEventListener('click', exportCurrentPdf);
 document.querySelector('#pdfBookBtn').addEventListener('click', exportPlaybookPdf);
+controls.bookOverviewToggleBtn?.addEventListener('click', () => toggleBookOverview());
+controls.playerNumberPicker?.addEventListener('click', handlePlayerNumberPickerClick);
+
+document.addEventListener('pointerdown', (event) => {
+  if (!controls.playerNumberPicker || controls.playerNumberPicker.hidden) return;
+  if (controls.playerNumberPicker.contains(event.target)) return;
+  hidePlayerNumberPicker();
+}, { capture: true });
 
 function undoCommand() {
   if (state.routeDraft?.input === 'poly') {
@@ -322,25 +332,65 @@ function updateSelectedPlayerMark(mark) {
   setStatus(`${player.label} Mark`);
 }
 
-function renamePlayerById(playerId = state.selectedId) {
+function hidePlayerNumberPicker() {
+  if (!controls.playerNumberPicker) return;
+  controls.playerNumberPicker.hidden = true;
+  controls.playerNumberPicker.removeAttribute('data-player-id');
+}
+
+function positionPlayerNumberPicker(clientX, clientY) {
+  const picker = controls.playerNumberPicker;
+  if (!picker) return;
+  picker.hidden = false;
+  const rect = picker.getBoundingClientRect();
+  const left = clamp(clientX - rect.width / 2, 10, Math.max(10, window.innerWidth - rect.width - 10));
+  const top = clamp(clientY - rect.height - 14, 10, Math.max(10, window.innerHeight - rect.height - 10));
+  picker.style.left = `${left}px`;
+  picker.style.top = `${top}px`;
+}
+
+function showPlayerNumberPicker(player, event = null) {
+  if (!controls.playerNumberPicker || !player || !canSwapPlayerNumber(player)) {
+    hidePlayerNumberPicker();
+    return;
+  }
+  controls.playerNumberPicker.dataset.playerId = player.id;
+  controls.playerNumberPicker.querySelectorAll('[data-player-number]').forEach((button) => {
+    const active = button.dataset.playerNumber === player.label;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+  positionPlayerNumberPicker(event?.clientX || window.innerWidth / 2, event?.clientY || window.innerHeight / 2);
+  setStatus(`No.${player.label}`);
+}
+
+function handlePlayerNumberPickerClick(event) {
+  const button = event.target.closest('[data-player-number]');
+  if (!button || !controls.playerNumberPicker?.contains(button)) return;
+  const playerId = controls.playerNumberPicker.dataset.playerId;
+  renamePlayerById(playerId, button.dataset.playerNumber);
+  hidePlayerNumberPicker();
+}
+
+function renamePlayerById(playerId = state.selectedId, nextLabelOverride = null) {
   const player = state.players.find((item) => item.id === playerId);
   if (!player) {
     setStatus('選手を選択');
-    return;
+    return false;
   }
   if (!canSwapPlayerNumber(player)) {
     setStatus('1/2 Fixed');
-    return;
+    return false;
   }
 
-  const input = prompt('Swap Number (3, 4, 5)', player.label);
-  if (input === null) return;
+  const input = nextLabelOverride ?? prompt('Swap Number (3, 4, 5)', player.label);
+  if (input === null) return false;
   const nextLabel = normalizePlayerLabel(input, player.label);
-  if (!nextLabel || nextLabel === player.label) return;
+  if (!nextLabel || nextLabel === player.label) return false;
   if (!PLAYER_SWAP_LABELS.has(nextLabel)) {
     alert('3, 4, 5 の中で選んでください。');
     setStatus('3/4/5 Only');
-    return;
+    return false;
   }
 
   const oldLabel = player.label;
@@ -362,6 +412,36 @@ function renamePlayerById(playerId = state.selectedId) {
   saveLocal(false, { historyKey: `player-label-${player.id}` });
   render();
   setStatus(targetPlayer ? `${oldLabel} / ${nextLabel} Swapped` : `Player ${oldLabel} -> ${nextLabel}`);
+  return true;
+}
+
+function syncBookOverviewView() {
+  const open = Boolean(state.bookOverviewOpen);
+  document.body.classList.toggle('is-book-overview-open', open);
+  if (controls.bookOverview) controls.bookOverview.hidden = !open;
+  if (controls.canvasWrap) controls.canvasWrap.hidden = open;
+  if (controls.bookOverviewToggleBtn) {
+    controls.bookOverviewToggleBtn.classList.toggle('is-active', open);
+    controls.bookOverviewToggleBtn.setAttribute('aria-pressed', String(open));
+    controls.bookOverviewToggleBtn.textContent = open ? 'Play' : 'Book List';
+    controls.bookOverviewToggleBtn.title = open ? 'Back to play' : 'Show book list';
+  }
+}
+
+function setBookOverviewOpen(open, options = {}) {
+  const nextOpen = Boolean(open);
+  state.bookOverviewOpen = nextOpen;
+  hidePlayerNumberPicker();
+  if (nextOpen) {
+    saveLocal(false, { recordHistory: false });
+    renderPlaybookSelectors();
+  }
+  syncBookOverviewView();
+  if (!options.quiet) setStatus(nextOpen ? 'Book List' : state.playName || 'Ready');
+}
+
+function toggleBookOverview() {
+  setBookOverviewOpen(!state.bookOverviewOpen);
 }
 
 function undoPolylinePoint() {
@@ -451,6 +531,14 @@ document.addEventListener('keydown', (event) => {
     deleteSelectedItem();
   }
   if (event.key === 'Escape') {
+    if (controls.playerNumberPicker && !controls.playerNumberPicker.hidden) {
+      hidePlayerNumberPicker();
+      return;
+    }
+    if (state.bookOverviewOpen) {
+      setBookOverviewOpen(false);
+      return;
+    }
     if (isFocusMode()) {
       setFocusMode(false);
       return;
@@ -780,6 +868,7 @@ function clampFocusDock() {
 }
 
 function setFocusMode(enabled) {
+  if (enabled && state.bookOverviewOpen) setBookOverviewOpen(false, { quiet: true });
   document.body.classList.toggle('is-focus-mode', enabled);
   if (enabled) {
     placeFocusDockDefault();
@@ -914,6 +1003,7 @@ mobileDockHandle?.addEventListener('pointercancel', endFocusDockDrag);
 async function startApp() {
   syncFullscreenButtons();
   syncMobileDockPanels();
+  syncBookOverviewView();
   const loadedSharedLink = await loadSharedLinkFromUrl();
   if (!loadedSharedLink) loadInitialState();
   if (isMobileLayout()) {

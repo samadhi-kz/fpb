@@ -299,6 +299,7 @@ const state = {
   suppressMobileBookClick: false,
   previewDrag: null,
   suppressPreviewClick: false,
+  bookOverviewOpen: false,
   pendingPreset: null,
   printCleanup: null,
   undoStack: [],
@@ -324,7 +325,12 @@ const layers = {
 
 const controls = {
   playbookTree: document.querySelector('#playbookTree'),
-  playbookPreview: document.querySelector('#playbookPreview'),
+  playbookPreview: document.querySelector('#bookOverviewList'),
+  bookOverview: document.querySelector('#bookOverview'),
+  bookOverviewToggleBtn: document.querySelector('#bookOverviewToggleBtn'),
+  bookOverviewCount: document.querySelector('#bookOverviewCount'),
+  canvasWrap: document.querySelector('.canvas-wrap'),
+  playerNumberPicker: document.querySelector('#playerNumberPicker'),
   playNotes: document.querySelector('#playNotes'),
   selectedText: document.querySelector('#selectedText'),
   selectionBadge: document.querySelector('#selectionBadge'),

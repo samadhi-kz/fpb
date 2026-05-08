@@ -476,6 +476,7 @@ function handlePointerDown(event) {
   const hit = targetFromEvent(event);
   const point = pointFromEvent(event);
   captureFieldPointer(event);
+  if (typeof hidePlayerNumberPicker === 'function') hidePlayerNumberPicker();
 
   if (focusModeCanvasWrap() && state.tool === 'select' && !hit) {
     const wrap = focusModeCanvasWrap();
@@ -562,7 +563,7 @@ function handlePointerDown(event) {
     const collection = hit.kind === 'player' ? state.players : hit.kind === 'defender' ? state.defenders : state.annotations;
     const item = collection.find((entry) => entry.id === hit.id);
     if (item) {
-      state.drag = { kind: hit.kind, id: hit.id, dx: item.x - point.x, dy: item.y - point.y };
+      state.drag = { kind: hit.kind, id: hit.id, dx: item.x - point.x, dy: item.y - point.y, start: point, moved: false };
     }
     return;
   }
@@ -622,6 +623,9 @@ function handlePointerMove(event) {
   const collection = state.drag.kind === 'player' ? state.players : state.drag.kind === 'defender' ? state.defenders : state.annotations;
   const item = collection.find((entry) => entry.id === state.drag.id);
   if (!item) return;
+  if (state.drag.start && pointDistance([point.x, point.y], [state.drag.start.x, state.drag.start.y]) > 6) {
+    state.drag.moved = true;
+  }
   item.x = point.x + state.drag.dx;
   item.y = point.y + state.drag.dy;
   if (state.drag.kind === 'player') moveLinkedRouteStarts(item);
@@ -646,8 +650,20 @@ function handlePointerUp(event) {
     return;
   }
 
-  if (state.drag) saveLocal(false);
-  state.drag = null;
+  if (state.drag) {
+    const drag = state.drag;
+    if (drag.start) {
+      const point = pointFromEvent(event);
+      if (pointDistance([point.x, point.y], [drag.start.x, drag.start.y]) > 6) drag.moved = true;
+    }
+    saveLocal(false);
+    state.drag = null;
+    if (drag.kind === 'player' && !drag.moved) {
+      const player = state.players.find((item) => item.id === drag.id);
+      if (player && typeof showPlayerNumberPicker === 'function') showPlayerNumberPicker(player, event);
+    }
+    return;
+  }
 }
 
 function cancelPointerInteraction() {

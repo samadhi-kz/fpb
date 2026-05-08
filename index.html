@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Flag Play Board">
     <title>Flag Play Board</title>
-    <link rel="stylesheet" href="styles.css?v=20260508-preview1">
+    <link rel="stylesheet" href="styles.css?v=20260508-overview2">
   </head>
   <body>
     <main class="app-shell">
@@ -27,7 +27,6 @@
             <button id="newFolderBtn" class="wide-button" type="button">+ Folder</button>
             <button id="newPlayInFolderBtn" class="wide-button" type="button">+ Play</button>
           </div>
-          <div id="playbookPreview" class="playbook-preview" aria-label="Play thumbnails"></div>
           <div id="playbookTree" class="playbook-tree" role="tree" aria-label="Playbook"></div>
         </section>
 
@@ -219,6 +218,7 @@
             <h2 id="titleLabel" class="editable-title" role="button" tabindex="0" data-action="rename-active-play" title="Rename play">New Play</h2>
           </div>
           <div class="topbar-actions">
+            <button id="bookOverviewToggleBtn" class="topbar-button secondary" type="button" title="Show book list" aria-pressed="false">Book List</button>
             <button id="sharePlayLinkBtn" class="topbar-button" type="button" title="Share current play only">1 Play Link</button>
             <button id="savePhotoBtn" class="topbar-button" type="button" title="Save photo">Photo</button>
             <div id="statusText" class="status" role="status" aria-live="polite">Ready</div>
@@ -247,6 +247,16 @@
             <g id="playerLayer"></g>
           </svg>
         </div>
+        <section id="bookOverview" class="book-overview" aria-label="Book list" hidden>
+          <header class="book-overview-header">
+            <div>
+              <div class="book-overview-kicker">Playbook</div>
+              <h3>Book List</h3>
+            </div>
+            <div id="bookOverviewCount" class="book-overview-count"></div>
+          </header>
+          <div id="bookOverviewList" class="book-overview-list playbook-preview" aria-label="Book play list"></div>
+        </section>
       </section>
     </main>
     <nav class="mobile-corner-actions" aria-label="Mobile playbook and export">
@@ -346,14 +356,19 @@
       </div>
     </nav>
     <div id="printBook" class="print-book" aria-hidden="true"></div>
+    <div id="playerNumberPicker" class="player-number-picker" role="group" aria-label="Player number" hidden>
+      <button type="button" data-player-number="3">3</button>
+      <button type="button" data-player-number="4">4</button>
+      <button type="button" data-player-number="5">5</button>
+    </div>
 
-    <script src="js/config.js?v=20260508-preview1"></script>
+    <script src="js/config.js?v=20260508-overview1"></script>
     <script src="js/model.js?v=20260507-lines1"></script>
-    <script src="js/playbook-tree.js?v=20260508-preview1"></script>
-    <script src="js/drawing.js?v=20260507-fix1"></script>
-    <script src="js/field-interactions.js?v=20260507-fix1"></script>
+    <script src="js/playbook-tree.js?v=20260508-overview1"></script>
+    <script src="js/drawing.js?v=20260508-overview1"></script>
+    <script src="js/field-interactions.js?v=20260508-overview1"></script>
     <script src="js/files.js?v=20260508-share6"></script>
     <script src="js/playbook-actions.js?v=20260507-endcap1"></script>
-    <script src="js/main.js?v=20260508-preview1"></script>
+    <script src="js/main.js?v=20260508-overview1"></script>
   </body>
 </html>
