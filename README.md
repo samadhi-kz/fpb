@@ -97,7 +97,7 @@ The presets are defined for one side of the field. Use `Flip H` to mirror the pl
 
 The GitHub Pages version uses Google Analytics to understand aggregate access patterns such as page views, referrers, browsers, devices, and approximate regions.
 
-The app does not intentionally send playbook JSON, play notes, comments, or exported play data as custom Analytics events. Shared play and book links store their data in the URL hash (`#play=...` or `#book=...`), and the app does not use that data for Analytics reporting.
+The app does not intentionally send playbook JSON, play notes, comments, or exported play data as custom Analytics events. Shared play and book links store their data in the URL hash (`#play=...` or `#book=...`), and the app does not use that data for Analytics reporting. Shared link URLs remain in the address bar after loading so they can be bookmarked.
 
 Do not include private or sensitive information in play notes if you plan to share exported JSON, links, screenshots, or PDF files.
 

@@ -463,6 +463,16 @@ function jsonForHtmlScript(value) {
     .replace(/\u2029/g, '\\u2029');
 }
 
+function jsonChunksForHtmlScript(value) {
+  const text = String(value);
+  const chunkSize = 1800;
+  const chunks = [];
+  for (let index = 0; index < text.length; index += chunkSize) {
+    chunks.push(jsonForHtmlScript(text.slice(index, index + chunkSize)));
+  }
+  return chunks.join(',\n        ');
+}
+
 function createShareOpenHtml(shareUrl, title, label) {
   const safeUrl = escapeHtml(shareUrl);
   const safeTitle = escapeHtml(title || label || 'Flag Play Board');
@@ -471,7 +481,6 @@ function createShareOpenHtml(shareUrl, title, label) {
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="0; url=${safeUrl}">
     <title>${safeTitle}</title>
     <style>
       body {
@@ -488,16 +497,17 @@ function createShareOpenHtml(shareUrl, title, label) {
         width: min(440px, 100%);
         display: grid;
         gap: 14px;
-        text-align: center;
       }
       h1 {
         margin: 0;
         font-size: 24px;
+        text-align: center;
       }
       p {
         margin: 0;
         color: #687386;
         line-height: 1.6;
+        text-align: center;
       }
       a {
         display: inline-block;
@@ -506,18 +516,67 @@ function createShareOpenHtml(shareUrl, title, label) {
         background: #0a84ff;
         color: #fff;
         font-weight: 800;
+        text-align: center;
         text-decoration: none;
+      }
+      button {
+        min-height: 44px;
+        border: 1px solid #c8d1dc;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        font: inherit;
+        font-weight: 800;
+      }
+      textarea {
+        width: 100%;
+        min-height: 96px;
+        resize: vertical;
+        padding: 10px;
+        border: 1px solid #c8d1dc;
+        border-radius: 8px;
+        color: #111827;
+        font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
     </style>
   </head>
   <body>
     <main>
       <h1>Flag Play Board</h1>
-      <p>Book Linkを開いています。自動で開かない場合は下のボタンを押してください。</p>
-      <a href="${safeUrl}">Open Book</a>
+      <p>スマホでは自動でBookを開きます。PCで開かない場合はOpen Bookを押してください。</p>
+      <a id="openBookButton" href="${safeUrl}" target="_blank" rel="noopener">Open Book</a>
+      <button id="copyBookButton" type="button">Copy Link</button>
+      <textarea id="bookUrl" readonly aria-label="Book Link">${safeUrl}</textarea>
     </main>
     <script>
-      window.location.replace(${jsonForHtmlScript(shareUrl)});
+      const bookUrl = [
+        ${jsonChunksForHtmlScript(shareUrl)}
+      ].join('');
+      const openBookButton = document.getElementById('openBookButton');
+      const copyBookButton = document.getElementById('copyBookButton');
+      const bookUrlText = document.getElementById('bookUrl');
+
+      openBookButton.href = bookUrl;
+      bookUrlText.value = bookUrl;
+
+      copyBookButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(bookUrl);
+          copyBookButton.textContent = 'Copied';
+        } catch {
+          bookUrlText.focus();
+          bookUrlText.select();
+          document.execCommand('copy');
+          copyBookButton.textContent = 'Selected';
+        }
+      });
+
+      const isTouchDevice = navigator.maxTouchPoints > 0 || /Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
+      if (isTouchDevice) {
+        window.setTimeout(() => {
+          window.location.href = bookUrl;
+        }, 450);
+      }
     </script>
   </body>
 </html>
@@ -738,16 +797,6 @@ function sharedBookTokenFromLocation() {
   return sharedTokenFromLocation(BOOK_SHARE_HASH_KEY);
 }
 
-function clearSharedHash() {
-  if (!window.history?.replaceState) {
-    window.location.hash = '';
-    return;
-  }
-  const url = new URL(window.location.href);
-  url.hash = '';
-  window.history.replaceState(null, document.title, url.toString());
-}
-
 async function loadSharedPlayFromUrl() {
   const token = sharedPlayTokenFromLocation();
   if (!token) return false;
@@ -765,7 +814,6 @@ async function loadSharedPlayFromUrl() {
     saveLocal(false);
     syncPlaysetFileBadge();
     resetHistory();
-    clearSharedHash();
     setStatus('Shared Play Loaded');
     return true;
   } catch (error) {
@@ -797,7 +845,6 @@ async function loadSharedBookFromUrl() {
     saveLocal(false);
     syncPlaysetFileBadge();
     resetHistory();
-    clearSharedHash();
     setStatus('Shared Book Loaded');
     return true;
   } catch (error) {
