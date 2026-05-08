@@ -855,6 +855,7 @@ function render() {
   syncSelectionControls();
   syncPresetButtons();
   syncPlaysetFileBadge();
+  if (typeof syncBookOverviewView === 'function') syncBookOverviewView();
 }
 
 function revealMobileSelectionControls(type) {

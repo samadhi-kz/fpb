@@ -326,7 +326,7 @@ select {
 }
 
 .playbook-tree {
-  max-height: 300px;
+  max-height: 430px;
   overflow-y: auto;
   padding: 4px;
   border: 1px solid var(--line);
@@ -969,6 +969,20 @@ select {
   background: var(--accent-dark);
 }
 
+.topbar-button.secondary {
+  border-color: rgba(10, 132, 255, .28);
+  background: rgba(255, 255, 255, .82);
+  color: var(--accent-dark);
+  box-shadow: var(--control-shadow);
+}
+
+.topbar-button.secondary:hover,
+.topbar-button.secondary.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 .status {
   min-width: 106px;
   padding: 8px 12px;
@@ -990,6 +1004,135 @@ select {
   place-items: center;
 }
 
+.book-overview {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid rgba(124, 136, 155, .22);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, .86);
+  -webkit-backdrop-filter: blur(18px) saturate(1.12);
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.book-overview[hidden] {
+  display: none;
+}
+
+.book-overview-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.book-overview-kicker {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.book-overview h3 {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.book-overview-count {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .78);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.book-overview-list.playbook-preview {
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  background: rgba(248, 250, 253, .78);
+}
+
+.book-overview .playbook-preview-folder {
+  gap: 10px;
+}
+
+.book-overview .playbook-preview-folder + .playbook-preview-folder {
+  margin-top: 8px;
+}
+
+.book-overview .playbook-preview-folder-header {
+  min-height: 40px;
+  padding: 9px 11px;
+}
+
+.book-overview .playbook-preview-folder-name {
+  font-size: 13px;
+}
+
+.book-overview .playbook-preview-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.book-overview .playbook-preview-card {
+  gap: 7px;
+  padding: 8px;
+}
+
+.book-overview .playbook-preview-play-name {
+  font-size: 12px;
+}
+
+.book-overview .mobile-play-preview,
+.playbook-preview .mobile-play-preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1000 / 720;
+  overflow: hidden;
+  border: 1px solid rgba(217, 222, 229, .9);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.mobile-preview-bg {
+  fill: #fff;
+}
+
+.mobile-preview-los {
+  stroke: #b5bbc1;
+  stroke-width: 9;
+}
+
+.mobile-preview-route.motion {
+  stroke-linejoin: round;
+}
+
+.mobile-preview-player,
+.mobile-preview-defender {
+  stroke: #fff;
+  stroke-width: 7;
+}
+
+.mobile-preview-player-text {
+  fill: #fff;
+  font-size: 31px;
+  font-weight: 900;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
 #field {
   width: min(100%, 1180px);
   height: auto;
@@ -1005,6 +1148,43 @@ select {
 
 .print-book {
   display: none;
+}
+
+.player-number-picker {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(10, 132, 255, .26);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 14px 36px rgba(30, 42, 60, .18), inset 0 1px 0 rgba(255, 255, 255, .9);
+  -webkit-backdrop-filter: blur(18px) saturate(1.16);
+  backdrop-filter: blur(18px) saturate(1.16);
+}
+
+.player-number-picker[hidden] {
+  display: none;
+}
+
+.player-number-picker button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(10, 132, 255, .18);
+  border-radius: 999px;
+  background: rgba(248, 250, 253, .92);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.player-number-picker button:hover,
+.player-number-picker button.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
 .mobile-corner-actions,
