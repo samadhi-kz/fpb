@@ -1004,6 +1004,10 @@ select {
   place-items: center;
 }
 
+.canvas-wrap[hidden] {
+  display: none;
+}
+
 .book-overview {
   min-height: 0;
   display: grid;
