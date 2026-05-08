@@ -2,6 +2,18 @@
 
 An interactive web-based tool for designing and visualizing flag football plays.
 
+[Live Demo](https://samadhi-kz.github.io/fpb/) | [Sponsor this project](https://github.com/sponsors/samadhi-kz)
+
+## Screenshots
+
+| Desktop play editor | Book List overview |
+| --- | --- |
+| ![Desktop play editor showing a 5v5 play diagram](docs/assets/desktop-play.png) | ![Book List overview with play thumbnails](docs/assets/book-list.png) |
+
+| Mobile Full mode |
+| --- |
+| ![Mobile Full mode play editor](docs/assets/mobile-full.png) |
+
 ## Features
 
 - Draw and edit football plays with routes, motions, passes, and blocks
@@ -25,6 +37,8 @@ An interactive web-based tool for designing and visualizing flag football plays.
 6. Customize player markers and sizes
 7. Save your playbook as JSON for later editing
 8. Share plays with links or export PDFs for sharing and printing
+
+Japanese usage notes are available in [docs/usage-ja.md](docs/usage-ja.md).
 
 ## Tools
 
@@ -131,30 +145,14 @@ No automated test suite is included. The recommended checks are:
 - Copyright (c) 2026 Kazutaka Maeda (@samadhi-kz, @maek0812)
 - See [LICENSE](./LICENSE) for details.
 
+## Support
+
+Flag Play Board is free to use. If it helps your coaching, team planning, or flag football workflow, please consider sponsoring the project.
+
+Sponsorship helps keep development going and supports improvements to play sharing, Book links, PDF export, mobile editing, and the overall user experience.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
 
-
-フラッグフットボールのオフェンスプレイ図を作るための静的Webアプリです。
-
-## 使い方
-
-`index.html` をブラウザで開くと動きます。
-
-- 選択ツールで選手や守備Xをドラッグ
-- 役割は 1 Center-Screen / 2 QB / 3 RB-WR / blocker / screen / 4 RB-WR / blocker / screen / 5 RB-WR / blocker / screen
-- Offense Formation で Single back / Spread / Twins / Twins stack / Trips / Bunch / Tight / Double back / I formation を一発配置
-- 反対側の形は Flip H で左右反転
-- Defense で守備マーカーの表示・非表示を切り替え
-- ルート、モーション、パス、ブロックを選んで、選手からドラッグして線を作成
-- 線を選択してドラッグすると線全体を移動
-- 青い点をドラッグするとルートを調整、黄色い点をドラッグすると中間点を追加
-- Text ツールでプレイ内にコメントを書き込み
-- 赤星は なし / 1-5 から切り替え
-- Clear Lines でルートをまとめてクリア
-- Folder と Play でプレイブックを整理してJSON保存
-- PDF ボタンで印刷ダイアログを開き、PDFとして保存
-- JSON でファイル出力
-- 5v5固定のため、選手と守備Xは常に5人ずつです
-- 作業はgit switch feature/test_1内で実施しPR後mainにマージされて反映される。
+Development workflow notes are available in [docs/development.md](docs/development.md).
