@@ -85,6 +85,7 @@ function syncPlaysetFileBadge() {
   } else {
     controls.playsetFileHint.textContent = 'This browser cannot overwrite files directly. Use "Save As" to download a JSON file.';
   }
+  if (typeof syncBookOverviewView === 'function') syncBookOverviewView();
 }
 
 function syncPlaybookState() {

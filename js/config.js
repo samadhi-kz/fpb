@@ -328,6 +328,7 @@ const controls = {
   playbookPreview: document.querySelector('#bookOverviewList'),
   bookOverview: document.querySelector('#bookOverview'),
   bookOverviewToggleBtn: document.querySelector('#bookOverviewToggleBtn'),
+  sharePlayLinkBtn: document.querySelector('#sharePlayLinkBtn'),
   bookOverviewCount: document.querySelector('#bookOverviewCount'),
   canvasWrap: document.querySelector('.canvas-wrap'),
   playerNumberPicker: document.querySelector('#playerNumberPicker'),
