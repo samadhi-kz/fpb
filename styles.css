@@ -3557,6 +3557,49 @@ body.is-focus-mode .mobile-full-button .tool-icon {
   min-width: 92px;
 }
 
+@media (max-width: 860px), (hover: none) and (pointer: coarse) and (max-width: 1366px) {
+  body:not(.is-focus-mode) .mobile-action-row .mobile-full-button {
+    border-color: rgba(10, 132, 255, .24);
+    background: rgba(255, 255, 255, .86);
+    color: var(--accent-dark);
+    box-shadow: var(--control-shadow);
+  }
+
+  body:not(.is-focus-mode) .mobile-action-row .mobile-full-button .tool-icon {
+    background: var(--accent-soft);
+    color: var(--accent-dark);
+  }
+
+  body.is-focus-mode {
+    background: #172033;
+  }
+
+  body.is-focus-mode .workspace,
+  body.is-focus-mode .canvas-wrap {
+    background: #172033;
+  }
+
+  body.is-focus-mode .mobile-dock {
+    border-color: rgba(255, 255, 255, .28);
+    background: rgba(238, 245, 247, .84);
+    box-shadow: 0 18px 44px rgba(3, 12, 24, .38);
+  }
+
+  body.is-focus-mode .mobile-action-row .mobile-full-button,
+  .mobile-action-row .mobile-full-button.is-full-active {
+    border-color: #00685f;
+    background: #00685f;
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(0, 104, 95, .32), inset 0 1px 0 rgba(255, 255, 255, .24);
+  }
+
+  body.is-focus-mode .mobile-action-row .mobile-full-button .tool-icon,
+  .mobile-action-row .mobile-full-button.is-full-active .tool-icon {
+    background: rgba(255, 255, 255, .2);
+    color: #fff;
+  }
+}
+
 @media print {
   @page {
     size: landscape;

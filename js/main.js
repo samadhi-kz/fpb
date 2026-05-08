@@ -676,6 +676,8 @@ function isFullViewActive() {
 function syncFullscreenButtons() {
   const active = isFullViewActive();
   document.querySelectorAll('[data-action="toggle-fullscreen"]').forEach((button) => {
+    button.classList.toggle('is-full-active', active);
+    button.setAttribute('aria-pressed', String(active));
     button.title = active ? 'Exit full view' : 'Full view';
     const label = button.querySelector('span:last-child');
     if (label && label !== button.querySelector('.tool-icon')) {
