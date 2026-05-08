@@ -200,6 +200,7 @@ bindTouchFriendlyCommand('[data-action="toggle-mobile-book-panel"]', toggleMobil
 bindTouchFriendlyCommand('[data-action="toggle-mobile-plays-panel"]', toggleMobilePlaysPanel);
 bindTouchFriendlyCommand('[data-action="toggle-mobile-tree-panel"]', toggleMobileTreePanel);
 bindTouchFriendlyCommand('[data-action="toggle-mobile-export-panel"]', toggleMobileExportPanel);
+bindTouchFriendlyCommand('[data-action="rename-playset-file"]', renamePlaysetFileName);
 bindTouchFriendlyCommand('[data-action="mobile-load-json"]', openPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-add-json"]', openAddPlaysetFile);
 bindTouchFriendlyCommand('[data-action="mobile-save-photo"]', savePhoto);

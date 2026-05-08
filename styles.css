@@ -1363,14 +1363,17 @@ body.is-focus-mode .mobile-corner-stack {
 body.is-focus-mode .mobile-corner-title-row {
   display: grid;
   order: 1;
-  width: min(154px, calc(100dvw - 20px));
+  width: min(208px, calc(100dvw - 20px));
   grid-template-columns: minmax(0, 1fr) 30px;
   gap: 6px;
   align-items: stretch;
 }
 
 body.is-focus-mode .mobile-file-badge {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
   width: 100%;
   min-height: 28px;
   overflow: hidden;
@@ -1379,11 +1382,33 @@ body.is-focus-mode .mobile-file-badge {
   border-radius: 8px;
   background: rgba(255, 255, 255, .7);
   color: var(--teal-dark);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 900;
   line-height: 1.1;
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.mobile-file-badge-text {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.mobile-file-badge-action {
+  display: grid;
+  min-height: 18px;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 104, 95, .1);
+  color: var(--teal-dark);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
 }
 
 body.is-focus-mode .mobile-corner-minimize {
@@ -2466,14 +2491,17 @@ body.is-focus-mode .mobile-full-button .tool-icon {
   .mobile-corner-title-row {
     display: grid;
     order: 1;
-    width: min(154px, calc(100dvw - 20px));
+    width: min(208px, calc(100dvw - 20px));
     grid-template-columns: minmax(0, 1fr) 30px;
     gap: 6px;
     align-items: stretch;
   }
 
   .mobile-file-badge {
-    display: block;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
     width: 100%;
     min-height: 28px;
     overflow: hidden;
@@ -2482,11 +2510,13 @@ body.is-focus-mode .mobile-full-button .tool-icon {
     border-radius: 8px;
     background: rgba(255, 255, 255, .7);
     color: var(--teal-dark);
+    cursor: pointer;
+    font-family: inherit;
     font-size: 11px;
     font-weight: 900;
     line-height: 1.1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    text-align: left;
+    touch-action: manipulation;
   }
 
   .mobile-corner-minimize {
@@ -3600,6 +3630,11 @@ body.is-focus-mode .mobile-full-button .tool-icon {
     border-color: rgba(255, 255, 255, .28);
     background: rgba(18, 28, 44, .88);
     box-shadow: 0 18px 44px rgba(3, 12, 24, .38);
+  }
+
+  body.is-focus-mode .mobile-file-badge-action {
+    background: rgba(255, 255, 255, .14);
+    color: rgba(238, 244, 255, .92);
   }
 
   body.is-focus-mode .mobile-action-row .mobile-full-button,

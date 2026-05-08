@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Flag Play Board">
     <title>Flag Play Board</title>
-    <link rel="stylesheet" href="styles.css?v=20260508-mobile-only-full1">
+    <link rel="stylesheet" href="styles.css?v=20260508-file-title1">
   </head>
   <body>
     <main class="app-shell">
@@ -260,7 +260,10 @@
     </main>
     <nav class="mobile-corner-actions" aria-label="Mobile playbook and export">
       <div class="mobile-corner-title-row">
-        <div id="mobilePlaysetFileName" class="mobile-file-badge" title="No JSON loaded">No JSON</div>
+        <button id="mobilePlaysetFileName" class="mobile-file-badge" type="button" data-action="rename-playset-file" title="Set book file name">
+          <span id="mobilePlaysetFileNameText" class="mobile-file-badge-text">Untitled Book</span>
+          <span class="mobile-file-badge-action">Name</span>
+        </button>
         <button class="mobile-corner-minimize" type="button" data-action="toggle-corner-minimized" aria-label="Minimize book tools" title="Minimize book tools">−</button>
       </div>
       <div class="mobile-corner-stack" role="group" aria-label="Book and export">
@@ -277,9 +280,9 @@
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-add-json" title="Add folders from JSON"><span class="tool-icon">{+}</span><span>Add</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-share-play-link" title="Share current play only"><span class="tool-icon">URL</span><span>1 Play</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-share-book-link" title="Share full book link"><span class="tool-icon">URL</span><span>Book</span></button>
-        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-photo" title="Save photo"><span class="tool-icon">◎</span><span>Photo</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-pdf-current" title="Save current play PDF"><span class="tool-icon">PDF</span><span>1 Play</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-pdf-book" title="Save playbook PDF"><span class="tool-icon">PDF</span><span>Book</span></button>
+        <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-photo" title="Save photo"><span class="tool-icon">◎</span><span>Photo</span></button>
         <button class="dock-action-button mobile-export-button" type="button" data-action="mobile-save-json" title="Save playbook JSON"><span class="tool-icon">{}</span><span>JSON</span></button>
       </div>
     </nav>
@@ -371,13 +374,13 @@
       </div>
     </div>
 
-    <script src="js/config.js?v=20260508-overview3"></script>
-    <script src="js/model.js?v=20260508-overview3"></script>
+    <script src="js/config.js?v=20260508-file-title1"></script>
+    <script src="js/model.js?v=20260508-file-title1"></script>
     <script src="js/playbook-tree.js?v=20260508-mobile-book-split1"></script>
     <script src="js/drawing.js?v=20260508-overview1"></script>
     <script src="js/field-interactions.js?v=20260508-overview1"></script>
-    <script src="js/files.js?v=20260508-share6"></script>
+    <script src="js/files.js?v=20260508-file-title1"></script>
     <script src="js/playbook-actions.js?v=20260508-book-actions1"></script>
-    <script src="js/main.js?v=20260508-mobile-only-full1"></script>
+    <script src="js/main.js?v=20260508-file-title1"></script>
   </body>
 </html>
