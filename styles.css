@@ -3648,13 +3648,14 @@ body.is-focus-mode .mobile-full-button .tool-icon {
 
 .share-copy-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
   margin-top: 14px;
 }
 
 .share-copy-actions .wide-button {
-  flex: 0 0 auto;
+  flex: 1 1 110px;
   min-width: 92px;
 }
 
