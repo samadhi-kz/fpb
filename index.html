@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Flag Play Board">
     <title>Flag Play Board</title>
-    <link rel="stylesheet" href="styles.css?v=20260508-file-title1">
+    <link rel="stylesheet" href="styles.css?v=20260509-play-list1">
   </head>
   <body>
     <main class="app-shell">
@@ -40,6 +40,15 @@
             <button id="savePlaysetFileBtn" class="wide-button primary" type="button">Overwrite Save</button>
           </div>
           <button id="savePlaysetAsBtn" class="wide-button" type="button">Save As</button>
+        </section>
+
+        <section class="panel notes-panel">
+          <div class="panel-title">Play Notes</div>
+          <div id="bookNoteLabel" class="book-note-label">
+            <div class="book-note-item"><span class="book-note-title">Book</span>: <span id="bookNoteName">My Play Book</span></div>
+            <div class="book-note-item"><span class="book-note-title">Play</span>: <span id="playNoteName">New Play</span></div>
+          </div>
+          <textarea id="playNotes" class="text-area" rows="3" placeholder="Notes"></textarea>
         </section>
 
         <section class="panel formation-panel">
@@ -175,15 +184,6 @@
           <div id="selectionBadge" class="selection-badge">Not Selected</div>
           <label class="field-label" for="selectedText">Comment</label>
           <textarea id="selectedText" class="text-area" rows="3" placeholder="Select a comment" disabled></textarea>
-        </section>
-
-        <section class="panel notes-panel">
-          <div class="panel-title">Play Notes</div>
-          <div id="bookNoteLabel" class="book-note-label">
-            <div class="book-note-item"><span class="book-note-title">Book</span>: <span id="bookNoteName">My Play Book</span></div>
-            <div class="book-note-item"><span class="book-note-title">Play</span>: <span id="playNoteName">New Play</span></div>
-          </div>
-          <textarea id="playNotes" class="text-area" rows="3" placeholder="Notes"></textarea>
         </section>
 
         <section class="panel marks-panel marks">
@@ -374,13 +374,13 @@
       </div>
     </div>
 
-    <script src="js/config.js?v=20260508-file-title1"></script>
-    <script src="js/model.js?v=20260508-file-title1"></script>
-    <script src="js/playbook-tree.js?v=20260508-mobile-book-split1"></script>
-    <script src="js/drawing.js?v=20260508-overview1"></script>
+    <script src="js/config.js?v=20260509-play-list1"></script>
+    <script src="js/model.js?v=20260509-play-list1"></script>
+    <script src="js/playbook-tree.js?v=20260509-play-list1"></script>
+    <script src="js/drawing.js?v=20260509-play-list1"></script>
     <script src="js/field-interactions.js?v=20260508-overview1"></script>
-    <script src="js/files.js?v=20260508-file-title1"></script>
+    <script src="js/files.js?v=20260509-play-list1"></script>
     <script src="js/playbook-actions.js?v=20260508-book-actions1"></script>
-    <script src="js/main.js?v=20260508-file-title1"></script>
+    <script src="js/main.js?v=20260509-play-list1"></script>
   </body>
 </html>

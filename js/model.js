@@ -161,6 +161,30 @@ function activePlay() {
   return folder?.plays.find((play) => play.id === state.activePlayId);
 }
 
+function playDisplayNumber(playId) {
+  let number = 1;
+  for (const folder of state.playbook.folders) {
+    for (const play of folder.plays) {
+      if (play.id === playId) return number;
+      number += 1;
+    }
+  }
+  return 0;
+}
+
+function playDisplayName(playOrName, playId = '') {
+  const play = typeof playOrName === 'object' ? playOrName : null;
+  const id = play?.id || playId;
+  const name = (play?.name || playOrName || 'Untitled').toString();
+  const number = playDisplayNumber(id);
+  return number ? `(${number}) ${name}` : name;
+}
+
+function activePlayDisplayName() {
+  const play = activePlay();
+  return play ? playDisplayName(play) : playDisplayName(state.playName || 'New Play', state.activePlayId);
+}
+
 function currentPlaySnapshot() {
   return {
     id: state.activePlayId || makeId('play'),

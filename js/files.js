@@ -450,7 +450,16 @@ function selectShareCopyText(area) {
   area.setSelectionRange(0, area.value.length);
 }
 
-function showManualShareLink(label, shareUrl) {
+function shareTextFileName(title, label) {
+  return `${safeFileBase(title || label || 'book-link', 'book-link')}-url.txt`;
+}
+
+function downloadShareUrlTextFile(shareUrl, filename) {
+  const blob = new Blob([`${shareUrl}\n`], { type: 'text/plain;charset=utf-8' });
+  downloadBlob(blob, filename);
+}
+
+function showManualShareLink(label, shareUrl, options = {}) {
   if (!document.body) {
     window.prompt(`${label}をコピーしてください。`, shareUrl);
     return;
@@ -468,7 +477,9 @@ function showManualShareLink(label, shareUrl) {
   title.textContent = `${label}をコピー`;
 
   const hint = document.createElement('p');
-  hint.textContent = 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
+  hint.textContent = options.longWarning
+    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Copyするか、Save TXTでテキストファイルとして保存できます。'
+    : 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
 
   const area = document.createElement('textarea');
   area.className = 'share-copy-text';
@@ -489,9 +500,19 @@ function showManualShareLink(label, shareUrl) {
   copyButton.type = 'button';
   copyButton.textContent = 'Copy';
 
+  const saveTextButton = document.createElement('button');
+  saveTextButton.className = 'wide-button';
+  saveTextButton.type = 'button';
+  saveTextButton.textContent = 'Save TXT';
+
   const close = () => overlay.remove();
 
   closeButton.addEventListener('click', close);
+  saveTextButton.addEventListener('click', () => {
+    downloadShareUrlTextFile(shareUrl, options.textFileName || shareTextFileName(options.title, label));
+    setStatus(`${label} TXT Saved (${shareUrl.length})`);
+    close();
+  });
   copyButton.addEventListener('click', async () => {
     if (await copyText(shareUrl)) {
       setStatus(`${label} Copied (${shareUrl.length})`);
@@ -510,35 +531,24 @@ function showManualShareLink(label, shareUrl) {
     if (event.key === 'Escape') close();
   });
 
-  actions.append(closeButton, copyButton);
+  actions.append(closeButton);
+  if (options.includeTextDownload) actions.append(saveTextButton);
+  actions.append(copyButton);
   dialog.append(title, hint, area, actions);
   overlay.append(dialog);
   document.body.append(overlay);
   window.requestAnimationFrame(() => selectShareCopyText(area));
 }
 
-function confirmLongShareCopy(label, shareUrl) {
-  if (shareUrl.length < LONG_SHARE_URL_WARNING_LENGTH) return true;
-  return window.confirm(
-    `${label}は ${shareUrl.length} 文字あります。\n\n`
-    + 'LINEやメールでは、長いURLが途中で切れる場合があります。\n'
-    + 'うまく共有できない場合は、Bitlyなどの短縮URLサービスで短くしてください。\n\n'
-    + 'OKを押すとリンクをコピーします。'
-  );
-}
-
 async function deliverShareUrl(shareUrl, title, label, options = {}) {
   const shouldCopyAfterWarning = options.warnIfLong && shareUrl.length >= LONG_SHARE_URL_WARNING_LENGTH;
   if (shouldCopyAfterWarning) {
-    if (!confirmLongShareCopy(label, shareUrl)) {
-      setStatus('Cancelled');
-      return;
-    }
-    if (await copyText(shareUrl)) {
-      setStatus(`${label} Copied (${shareUrl.length})`);
-      return;
-    }
-    showManualShareLink(label, shareUrl);
+    showManualShareLink(label, shareUrl, {
+      includeTextDownload: true,
+      longWarning: true,
+      textFileName: shareTextFileName(title, label),
+      title
+    });
     setStatus(`${label} Ready (${shareUrl.length})`);
     return;
   }
@@ -905,7 +915,7 @@ function buildBookPrintPages(entries, options = {}) {
     render();
 
     return {
-      title: `${folder.name} / ${play.name || 'Untitled'}`,
+      title: `${folder.name} / ${playDisplayName(play)}`,
       svg: serializeFieldForExport(options)
     };
   });

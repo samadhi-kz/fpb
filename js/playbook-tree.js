@@ -2,6 +2,29 @@
 const MOBILE_BOOK_LONG_PRESS_MS = 360;
 const MOBILE_BOOK_DRAG_CANCEL_PX = 10;
 
+function mobileBookScrollContainer() {
+  return controls.mobilePlaybookList?.closest('.mobile-book-row') || controls.mobilePlaybookList;
+}
+
+function capturePlaybookScrollPositions() {
+  return {
+    tree: controls.playbookTree?.scrollTop || 0,
+    mobileBook: mobileBookScrollContainer()?.scrollTop || 0,
+    preview: controls.bookOverview?.scrollTop || 0
+  };
+}
+
+function restorePlaybookScrollPositions(positions) {
+  const restore = () => {
+    if (controls.playbookTree) controls.playbookTree.scrollTop = positions.tree;
+    const mobileBook = mobileBookScrollContainer();
+    if (mobileBook) mobileBook.scrollTop = positions.mobileBook;
+    if (controls.bookOverview) controls.bookOverview.scrollTop = positions.preview;
+  };
+  restore();
+  window.requestAnimationFrame(restore);
+}
+
 function treeActionButton(action, text, title, dataset = {}, danger = false) {
   const button = document.createElement('button');
   button.className = `tree-action${danger ? ' danger' : ''}`;
@@ -14,6 +37,7 @@ function treeActionButton(action, text, title, dataset = {}, danger = false) {
 }
 
 function renderPlaybookSelectors() {
+  const scrollPositions = capturePlaybookScrollPositions();
   controls.playbookTree.replaceChildren();
 
   state.playbook.folders.forEach((folder) => {
@@ -73,6 +97,7 @@ function renderPlaybookSelectors() {
         children.append(empty);
       }
       folder.plays.forEach((play) => {
+        const displayName = playDisplayName(play);
         const isActivePlay = isActiveFolder && play.id === state.activePlayId;
         const playRow = document.createElement('div');
         playRow.className = `tree-row tree-play-row${isActivePlay ? ' is-active' : ''}`;
@@ -98,7 +123,7 @@ function renderPlaybookSelectors() {
         playIcon.textContent = '•';
         const playName = document.createElement('span');
         playName.className = 'tree-name';
-        playName.textContent = play.name || 'Untitled';
+        playName.textContent = displayName;
         playLabel.append(playIcon, playName);
 
         const playActions = document.createElement('div');
@@ -119,6 +144,7 @@ function renderPlaybookSelectors() {
   });
   renderDesktopPlaybookPreview();
   renderMobilePlaybookSelectors();
+  restorePlaybookScrollPositions(scrollPositions);
 }
 
 function appendPreviewRoute(svg, route) {
@@ -256,6 +282,7 @@ function renderDesktopPlaybookPreview() {
     }
 
     folder.plays.forEach((play) => {
+      const displayName = playDisplayName(play);
       const isActivePlay = isActiveFolder && play.id === state.activePlayId;
       const card = document.createElement('button');
       card.className = `playbook-preview-card${isActivePlay ? ' is-active' : ''}`;
@@ -265,12 +292,12 @@ function renderDesktopPlaybookPreview() {
       card.dataset.dragKind = 'play';
       card.dataset.folderId = folder.id;
       card.dataset.playId = play.id;
-      card.title = `Open ${play.name || 'Untitled'}`;
-      card.setAttribute('aria-label', `Open ${play.name || 'Untitled'}`);
+      card.title = `Open ${displayName}`;
+      card.setAttribute('aria-label', `Open ${displayName}`);
       card.append(createMobilePlayPreviewSvg(play, { viewBox: BOOK_OVERVIEW_PREVIEW_VIEW_BOX }));
       const name = document.createElement('span');
       name.className = 'playbook-preview-play-name';
-      name.textContent = play.name || 'Untitled';
+      name.textContent = displayName;
       card.append(name);
       grid.append(card);
     });
@@ -347,31 +374,40 @@ function renderMobilePlaybookSelectors() {
 
     const folderLabel = document.createElement('div');
     folderLabel.className = 'mobile-play-preview-folder-label';
+    folderLabel.dataset.mobilePreviewDrop = 'folder';
+    folderLabel.dataset.folderId = folder.id;
     folderLabel.textContent = folder.name || 'Folder';
 
     const folderGrid = document.createElement('div');
     folderGrid.className = 'mobile-play-preview-folder-grid';
+    folderGrid.dataset.mobilePreviewDrop = 'folder';
+    folderGrid.dataset.folderId = folder.id;
     if (!folder.plays.length) {
       const empty = document.createElement('div');
       empty.className = 'mobile-book-empty mobile-play-preview-empty';
+      empty.dataset.mobilePreviewDrop = 'folder';
+      empty.dataset.folderId = folder.id;
       empty.textContent = 'Empty';
       folderGrid.append(empty);
     }
 
     folder.plays.forEach((play) => {
+      const displayName = playDisplayName(play);
       const isActivePlay = isActiveFolder && play.id === state.activePlayId;
       const button = document.createElement('button');
       button.className = `mobile-play-preview-card${isActivePlay ? ' is-active' : ''}`;
       button.type = 'button';
+      button.draggable = true;
       button.dataset.mobilePlaybookAction = 'select-play';
+      button.dataset.dragKind = 'play';
       button.dataset.folderId = folder.id;
       button.dataset.playId = play.id;
-      button.title = `Load ${play.name || 'Untitled'}`;
-      button.setAttribute('aria-label', `Load ${play.name || 'Untitled'}`);
+      button.title = `Drag or load ${displayName}`;
+      button.setAttribute('aria-label', `Drag or load ${displayName}`);
       button.append(createMobilePlayPreviewSvg(play));
       const title = document.createElement('span');
       title.className = 'mobile-play-preview-title';
-      title.textContent = play.name || 'Untitled';
+      title.textContent = displayName;
       const loadLabel = document.createElement('span');
       loadLabel.className = 'mobile-play-preview-load';
       loadLabel.textContent = isActivePlay ? 'Loaded' : 'Load';
@@ -432,6 +468,7 @@ function renderMobilePlaybookSelectors() {
         playList.append(empty);
       }
       folder.plays.forEach((play, playIndex) => {
+        const displayName = playDisplayName(play);
         const isActivePlay = isActiveFolder && play.id === state.activePlayId;
         const playItem = document.createElement('div');
         playItem.className = 'mobile-book-play-item';
@@ -445,7 +482,7 @@ function renderMobilePlaybookSelectors() {
         playButton.dataset.mobilePlaybookAction = 'select-play';
         playButton.dataset.folderId = folder.id;
         playButton.dataset.playId = play.id;
-        playButton.textContent = play.name || 'Untitled';
+        playButton.textContent = displayName;
 
         const playActions = document.createElement('div');
         playActions.className = 'mobile-book-inline-actions';
@@ -544,6 +581,45 @@ function mobileBookDropPosition(clientY, row) {
   return clientY < rect.top + rect.height / 2 ? 'before' : 'after';
 }
 
+function mobilePreviewDropPosition(clientX, row) {
+  const rect = row.getBoundingClientRect();
+  return clientX < rect.left + rect.width / 2 ? 'before' : 'after';
+}
+
+function mobilePreviewDropTargetFromElement(element, clientX, clientY, drag = null) {
+  const payload = drag || state.mobileBookDrag?.payload || state.mobilePreviewDrag;
+  if (!payload || payload.kind !== 'play' || !controls.mobilePlaybookList?.contains(element)) return null;
+
+  const card = element.closest('.mobile-play-preview-card');
+  if (card && card.dataset.playId !== payload.playId) {
+    return {
+      kind: 'play',
+      row: card,
+      folderId: card.dataset.folderId,
+      playId: card.dataset.playId,
+      position: mobilePreviewDropPosition(clientX, card)
+    };
+  }
+
+  const folderTarget = element.closest('[data-mobile-preview-drop="folder"]');
+  if (folderTarget) {
+    return {
+      kind: 'folder',
+      row: folderTarget,
+      folderId: folderTarget.dataset.folderId,
+      position: 'inside'
+    };
+  }
+
+  return null;
+}
+
+function mobilePreviewDropTargetFromPoint(clientX, clientY, drag = null) {
+  const element = document.elementFromPoint(clientX, clientY);
+  if (!element) return null;
+  return mobilePreviewDropTargetFromElement(element, clientX, clientY, drag);
+}
+
 function mobileBookDropRowFromPoint(clientX, clientY) {
   const element = document.elementFromPoint(clientX, clientY);
   if (!element || !controls.mobilePlaybookList?.contains(element)) return null;
@@ -555,6 +631,8 @@ function mobileBookDropRowFromPoint(clientX, clientY) {
 function mobileBookDropTargetFromPoint(clientX, clientY) {
   const drag = state.mobileBookDrag?.payload;
   if (!drag) return null;
+  const previewTarget = mobilePreviewDropTargetFromPoint(clientX, clientY, drag);
+  if (previewTarget) return previewTarget;
   const row = mobileBookDropRowFromPoint(clientX, clientY);
   if (!row || !controls.mobilePlaybookList?.contains(row)) return null;
 
@@ -600,8 +678,8 @@ function clearMobileBookDropIndicators(includeDragging = false) {
     .forEach((row) => row.classList.remove('is-mobile-drop-before', 'is-mobile-drop-after', 'is-mobile-drop-into'));
   if (includeDragging) {
     controls.mobilePlaybookList
-      .querySelectorAll('.is-mobile-book-dragging')
-      .forEach((row) => row.classList.remove('is-mobile-book-dragging'));
+      .querySelectorAll('.is-mobile-book-dragging, .is-mobile-preview-dragging')
+      .forEach((row) => row.classList.remove('is-mobile-book-dragging', 'is-mobile-preview-dragging'));
   }
 }
 
@@ -644,8 +722,8 @@ function cancelMobileBookLongPress() {
 }
 
 function mobileBookDragRowFromTarget(target) {
-  if (target.closest('.mobile-book-inline-actions, .mobile-book-add-button, .mobile-play-preview-card')) return null;
-  const row = target.closest('.mobile-book-folder-header, .mobile-book-play-item');
+  if (target.closest('.mobile-book-inline-actions, .mobile-book-add-button')) return null;
+  const row = target.closest('.mobile-book-folder-header, .mobile-book-play-item, .mobile-play-preview-card');
   if (!row || !controls.mobilePlaybookList?.contains(row)) return null;
   return row;
 }
@@ -678,7 +756,7 @@ function startMobileBookLongDrag(pointerId) {
   const drag = state.mobileBookDrag;
   if (!drag || drag.pointerId !== pointerId) return;
   drag.dragging = true;
-  drag.row.classList.add('is-mobile-book-dragging');
+  drag.row.classList.add(drag.row.classList.contains('mobile-play-preview-card') ? 'is-mobile-preview-dragging' : 'is-mobile-book-dragging');
   document.body.classList.add('is-mobile-book-long-drag');
   suppressMobileBookClickAfterDrag();
   updateMobileBookDragTarget(drag.lastX, drag.lastY);
@@ -1086,6 +1164,56 @@ function handlePlaybookPreviewClick(event) {
     selectPlay(folderId, playId);
     focusSelectedPlayForEditing();
   }
+}
+
+function mobilePreviewDragRowFromEvent(event) {
+  const row = event.target.closest('.mobile-play-preview-card[draggable="true"]');
+  if (!row || !controls.mobilePlaybookList?.contains(row)) return null;
+  return row;
+}
+
+function handleMobilePlayPreviewDragStart(event) {
+  const row = mobilePreviewDragRowFromEvent(event);
+  if (!row) return;
+  state.mobilePreviewDrag = mobileBookPayloadFromRow(row);
+  if (!state.mobilePreviewDrag) {
+    event.preventDefault();
+    return;
+  }
+  row.classList.add('is-mobile-preview-dragging');
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', JSON.stringify(state.mobilePreviewDrag));
+}
+
+function handleMobilePlayPreviewDragOver(event) {
+  if (!state.mobilePreviewDrag) return;
+  const target = mobilePreviewDropTargetFromElement(event.target, event.clientX, event.clientY, state.mobilePreviewDrag);
+  clearMobileBookDropIndicators();
+  if (!target) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  markMobileBookDropTarget(target);
+}
+
+function handleMobilePlayPreviewDrop(event) {
+  if (!state.mobilePreviewDrag) return;
+  const drag = state.mobilePreviewDrag;
+  const target = mobilePreviewDropTargetFromElement(event.target, event.clientX, event.clientY, drag);
+  clearMobileBookDropIndicators(true);
+  state.mobilePreviewDrag = null;
+  if (!target) return;
+  event.preventDefault();
+  suppressMobileBookClickAfterDrag();
+  movePlayByDrop(drag, target);
+}
+
+function handleMobilePlayPreviewDragEnd() {
+  clearMobileBookDropIndicators(true);
+  state.mobilePreviewDrag = null;
+}
+
+function handleMobilePlayPreviewDragLeave(event) {
+  if (!controls.mobilePlaybookList?.contains(event.relatedTarget)) clearMobileBookDropIndicators();
 }
 
 function handlePlaybookTreeDragStart(event) {

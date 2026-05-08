@@ -572,7 +572,7 @@ function drawMeta() {
     'data-id': 'meta-play',
     'data-kind': 'meta-play'
   });
-  const titleLines = appendMultilineText(title, state.playName, metaX, 28, { maxWidth: metaWidth, maxLines: 3 });
+  const titleLines = appendMultilineText(title, activePlayDisplayName(), metaX, 28, { maxWidth: metaWidth, maxLines: 3 });
   layers.meta.append(title);
   y += titleLines * 28 + 18;
 
@@ -643,6 +643,7 @@ function renderDragUpdate(kind) {
 }
 
 function drawMarkControls() {
+  if (!controls.markList) return;
   controls.markList.replaceChildren();
   state.players.forEach((player) => {
     const item = document.createElement('div');
@@ -818,7 +819,7 @@ function syncSelectionControls() {
 }
 
 function render() {
-  controls.titleLabel.textContent = state.playName;
+  controls.titleLabel.textContent = activePlayDisplayName();
   const folderName = activeFolder()?.name || '';
   controls.folderLabel.textContent = folderName;
   controls.folderLabel.style.display = folderName ? 'block' : 'none';
@@ -826,7 +827,7 @@ function render() {
     controls.bookNoteName.textContent = folderName || 'My Play Book';
   }
   if (controls.playNoteName) {
-    controls.playNoteName.textContent = state.playName || 'New Play';
+    controls.playNoteName.textContent = activePlayDisplayName() || 'New Play';
   }
   controls.defenseToggle.checked = state.defenseVisible;
   syncDefenseVisibilityControls();

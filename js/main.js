@@ -54,6 +54,11 @@ controls.playbookPreview?.addEventListener('drop', handlePlaybookPreviewDrop);
 controls.playbookPreview?.addEventListener('dragend', handlePlaybookPreviewDragEnd);
 controls.playbookPreview?.addEventListener('dragleave', handlePlaybookPreviewDragLeave);
 controls.mobilePlaybookList?.addEventListener('click', handleMobilePlaybookClick);
+controls.mobilePlaybookList?.addEventListener('dragstart', handleMobilePlayPreviewDragStart);
+controls.mobilePlaybookList?.addEventListener('dragover', handleMobilePlayPreviewDragOver);
+controls.mobilePlaybookList?.addEventListener('drop', handleMobilePlayPreviewDrop);
+controls.mobilePlaybookList?.addEventListener('dragend', handleMobilePlayPreviewDragEnd);
+controls.mobilePlaybookList?.addEventListener('dragleave', handleMobilePlayPreviewDragLeave);
 controls.mobilePlaybookList?.addEventListener('pointerdown', handleMobilePlaybookPointerDown);
 controls.mobilePlaybookList?.addEventListener('touchstart', handleMobilePlaybookTouchStart, { passive: true });
 controls.mobilePlaybookList?.addEventListener('contextmenu', handleMobilePlaybookContextMenu);
@@ -470,7 +475,7 @@ function syncBookOverviewView() {
     controls.folderLabel.title = open ? 'Book list' : 'Rename playbook';
   }
   if (controls.titleLabel) {
-    controls.titleLabel.textContent = open ? state.fileName || 'Unsaved Playbook' : state.playName;
+    controls.titleLabel.textContent = open ? state.fileName || 'Unsaved Playbook' : activePlayDisplayName();
     controls.titleLabel.title = open ? 'Current playbook file' : 'Rename play';
     controls.titleLabel.setAttribute('aria-label', open ? 'Current playbook file' : 'Rename play');
   }
@@ -496,7 +501,7 @@ function setBookOverviewOpen(open, options = {}) {
     renderPlaybookSelectors();
   }
   syncBookOverviewView();
-  if (!options.quiet) setStatus(nextOpen ? 'Book List' : state.playName || 'Ready');
+  if (!options.quiet) setStatus(nextOpen ? 'Book List' : activePlayDisplayName() || 'Ready');
 }
 
 function toggleBookOverview() {
