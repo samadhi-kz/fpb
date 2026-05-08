@@ -62,15 +62,24 @@ function syncRouteShapeControl() {
 function syncPlaysetFileBadge() {
   const canWriteFile = Boolean(state.fileHandle);
   const hasFileSystemAccess = 'showSaveFilePicker' in window;
+  const fileStatusLabel = canWriteFile ? 'Save Location' : 'File Name';
+  const mobileFileName = state.fileName || 'Untitled Book';
   controls.playsetFileName.textContent = state.fileName
-    ? `${canWriteFile ? 'Save Location' : 'Load From'}: ${state.fileName}`
+    ? `${fileStatusLabel}: ${state.fileName}`
     : 'Save Location: Not Selected';
   controls.playsetFileName.title = state.fileName ? state.fileName : 'Save Location Not Selected';
   if (controls.mobilePlaysetFileName) {
-    controls.mobilePlaysetFileName.textContent = state.fileName || 'No JSON';
+    if (controls.mobilePlaysetFileNameText) {
+      controls.mobilePlaysetFileNameText.textContent = mobileFileName;
+    } else {
+      controls.mobilePlaysetFileName.textContent = mobileFileName;
+    }
     controls.mobilePlaysetFileName.title = state.fileName
-      ? `${canWriteFile ? 'Save Location' : 'Load From'}: ${state.fileName}`
-      : 'No JSON loaded';
+      ? `${fileStatusLabel}: ${state.fileName}`
+      : 'Set book file name';
+    controls.mobilePlaysetFileName.setAttribute('aria-label', state.fileName
+      ? `Rename book file: ${state.fileName}`
+      : 'Set book file name');
     controls.mobilePlaysetFileName.classList.toggle('is-empty', !state.fileName);
   }
   controls.savePlaysetFileBtn.disabled = !canWriteFile;

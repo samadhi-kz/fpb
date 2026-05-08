@@ -337,6 +337,7 @@ const controls = {
   selectionBadge: document.querySelector('#selectionBadge'),
   playsetFileName: document.querySelector('#playsetFileName'),
   mobilePlaysetFileName: document.querySelector('#mobilePlaysetFileName'),
+  mobilePlaysetFileNameText: document.querySelector('#mobilePlaysetFileNameText'),
   folderLabel: document.querySelector('#folderLabel'),
   bookNoteName: document.querySelector('#bookNoteName'),
   playNoteName: document.querySelector('#playNoteName'),

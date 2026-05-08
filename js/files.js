@@ -238,6 +238,55 @@ function fileNameWithJsonExtension(name) {
   return base.toLowerCase().endsWith('.json') ? base : `${base}.json`;
 }
 
+function cleanPlaysetFileName(name, fallback = 'flag-playbook') {
+  return fileNameWithJsonExtension(safeFileBase(name, fallback));
+}
+
+function suggestedPlaysetFileName() {
+  return cleanPlaysetFileName(
+    state.fileName || activeFolder()?.name || state.playbook?.folders?.[0]?.name,
+    'flag-playbook'
+  );
+}
+
+function setPlaysetFileName(name, options = {}) {
+  const nextName = cleanPlaysetFileName(name, 'flag-playbook');
+  if (!nextName) return false;
+  if (state.fileHandle && state.fileHandle.name !== nextName) {
+    state.fileHandle = null;
+  }
+  if (state.fileName === nextName) return true;
+  state.fileName = nextName;
+  syncPlaysetFileBadge();
+  if (options.status !== false) setStatus('File Name Set');
+  return true;
+}
+
+function promptPlaysetFileName(label = 'Book File Name') {
+  const fallback = suggestedPlaysetFileName();
+  const input = prompt(label, fallback);
+  if (input === null) return '';
+  return cleanPlaysetFileName(input || fallback, 'flag-playbook');
+}
+
+function renamePlaysetFileName() {
+  const nextName = promptPlaysetFileName('Book File Name');
+  if (!nextName) return false;
+  return setPlaysetFileName(nextName);
+}
+
+function ensureBookLinkFileName() {
+  if (state.fileName) {
+    const normalizedName = cleanPlaysetFileName(state.fileName, 'flag-playbook');
+    if (normalizedName !== state.fileName) setPlaysetFileName(normalizedName, { status: false });
+    return normalizedName;
+  }
+  const nextName = promptPlaysetFileName('Book Link File Name');
+  if (!nextName) return '';
+  setPlaysetFileName(nextName, { status: false });
+  return nextName;
+}
+
 function currentPlaysetJson() {
   syncPlaybookState();
   return JSON.stringify(state.playbook, null, 2);
@@ -308,9 +357,11 @@ function playbookWithoutSourceImages(playbook) {
   return clean;
 }
 
-function playbookForBookLink() {
+function playbookForBookLink(fileName = '') {
   syncPlaybookState();
-  return playbookWithoutSourceImages(state.playbook);
+  const playbook = playbookWithoutSourceImages(state.playbook);
+  if (fileName) playbook.fileName = cleanPlaysetFileName(fileName, 'flag-playbook');
+  return playbook;
 }
 
 function encodePlaySharePayload(payload) {
@@ -533,10 +584,15 @@ async function shareCurrentPlayLink() {
 async function shareCurrentBookLink() {
   saveLocal(false);
   try {
-    const playbook = playbookForBookLink();
+    const fileName = ensureBookLinkFileName();
+    if (!fileName) {
+      setStatus('Cancelled');
+      return;
+    }
+    const playbook = playbookForBookLink(fileName);
     const token = await encodeBookSharePayload(playbook);
     const shareUrl = `${currentPageUrlWithoutHash()}#${BOOK_SHARE_HASH_KEY}=${token}`;
-    const bookName = activeFolder()?.name || 'Flag Play Board';
+    const bookName = fileName.replace(/\.json$/i, '') || activeFolder()?.name || 'Flag Play Board';
     await deliverShareUrl(shareUrl, bookName, 'Book Link', { warnIfLong: true });
   } catch (error) {
     console.error(error);
@@ -601,12 +657,16 @@ async function loadSharedBookFromUrl() {
   const token = sharedBookTokenFromLocation();
   if (!token) return false;
   try {
-    const playbook = normalizeImportedPlaybook(await decodeBookSharePayload(token));
+    const sharedPayload = await decodeBookSharePayload(token);
+    const playbook = normalizeImportedPlaybook(sharedPayload);
     state.playbook = playbook;
     state.activeFolderId = playbook.activeFolderId;
     state.activePlayId = playbook.activePlayId;
     state.fileHandle = null;
-    state.fileName = 'Shared Book Link';
+    state.fileName = cleanPlaysetFileName(
+      sharedPayload?.fileName || playbook.folders?.[0]?.name || 'shared-book',
+      'shared-book'
+    );
     state.openFolderIds = new Set(playbook.folders.map((folder) => folder.id));
     const play = activePlay();
     if (play) applyPlay(play);
