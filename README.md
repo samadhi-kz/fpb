@@ -23,7 +23,7 @@ An interactive web-based tool for designing and visualizing flag football plays.
 - Customize player markers (light blue circles, red stars, yellow diamonds, green squares)
 - Adjust player size and end cap size
 - Save and load plays as JSON
-- Share plays with links and export plays as PDF
+- Share plays with links, export long book links as tap-to-open HTML files, and export plays as PDF
 - Manage playbooks with folders and multiple plays
 - Responsive canvas for desktop, tablet, and phone use
 
@@ -91,7 +91,7 @@ The presets are defined for one side of the field. Use `Flip H` to mirror the pl
 - Smartphone web use: open the GitHub Pages URL in iOS Safari or Android Chrome.
 - Static hosting only: GitHub Pages or any static file host is enough. No server-side code is required.
 - Optional file-system access: direct overwrite works only in browsers that support the File System Access API. Use `Save As` on Safari and other browsers without direct overwrite support.
-- Export behavior depends on the browser: links use clipboard/share support, and PDF uses the browser print dialog.
+- Export behavior depends on the browser: links use clipboard/share support, long book links can be saved or shared as HTML opener files, and PDF uses the browser print dialog.
 
 ## Analytics and Privacy
 
@@ -127,7 +127,7 @@ No automated test suite is included. The recommended checks are:
    - new folder/play creation works
    - routes can be drawn, edited, and cleared
    - JSON export/import works
-   - link sharing and PDF export functions open correctly
+   - link sharing, long Book Link HTML export, and PDF export functions open correctly
 3. Open the GitHub Pages URL on a desktop browser and verify static hosting works normally.
 4. Open the GitHub Pages URL on a smartphone and verify tapping, route creation, the bottom dock, formation buttons, and file export work as expected.
 5. Confirm the app remains functional when switching between tools and when using the save/load workflow.
