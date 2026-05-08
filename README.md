@@ -157,4 +157,3 @@ Contributions are welcome! Please feel free to submit issues or pull requests.
 - PDF ボタンで印刷ダイアログを開き、PDFとして保存
 - JSON でファイル出力
 - 5v5固定のため、選手と守備Xは常に5人ずつです
-- git test
