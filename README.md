@@ -93,6 +93,14 @@ The presets are defined for one side of the field. Use `Flip H` to mirror the pl
 - Optional file-system access: direct overwrite works only in browsers that support the File System Access API. Use `Save As` on Safari and other browsers without direct overwrite support.
 - Export behavior depends on the browser: links use clipboard/share support, and PDF uses the browser print dialog.
 
+## Analytics and Privacy
+
+The GitHub Pages version uses Google Analytics to understand aggregate access patterns such as page views, referrers, browsers, devices, and approximate regions.
+
+The app does not intentionally send playbook JSON, play notes, comments, or exported play data as custom Analytics events. Shared play and book links store their data in the URL hash (`#play=...` or `#book=...`), and the app does not use that data for Analytics reporting.
+
+Do not include private or sensitive information in play notes if you plan to share exported JSON, links, screenshots, or PDF files.
+
 ## Testing
 
 No automated test suite is included. The recommended checks are:
@@ -132,8 +140,8 @@ No automated test suite is included. The recommended checks are:
 
 ## Security Notes
 
-- The app is static HTML/CSS/JavaScript. It has no backend, login, cookies, or remote API calls.
-- Scripts are loaded from local project files only.
+- The app is static HTML/CSS/JavaScript. It has no backend, login, or app-specific remote API.
+- Application logic scripts are loaded from local project files. The GitHub Pages version also loads the Google Analytics tag from Google Tag Manager for access measurement.
 - Playbook JSON is parsed in the browser and normalized before use.
 - User-controlled names, notes, and comments are rendered with text APIs instead of HTML injection.
 - File open/save uses browser file dialogs or browser downloads.
