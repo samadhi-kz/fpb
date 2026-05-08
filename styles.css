@@ -66,6 +66,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
+a:focus-visible,
 [role="button"]:focus-visible {
   outline: 3px solid rgba(47, 111, 237, .34);
   outline-offset: 2px;
@@ -304,8 +305,13 @@ select {
 }
 
 .wide-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 40px;
   padding: 8px 10px;
+  text-align: center;
+  text-decoration: none;
 }
 
 .wide-button:hover,
@@ -315,6 +321,24 @@ select {
   border-color: rgba(10, 132, 255, .34);
   background: var(--control-hover);
   transform: translateY(-1px);
+}
+
+a.dock-action-button {
+  text-decoration: none;
+}
+
+.support-link,
+.mobile-support-button {
+  border-color: rgba(0, 104, 95, .22);
+  background: rgba(232, 244, 242, .78);
+  color: var(--teal-dark);
+}
+
+.support-link:hover,
+.mobile-support-button:hover {
+  border-color: rgba(0, 104, 95, .34);
+  background: rgba(232, 244, 242, .96);
+  color: var(--teal-dark);
 }
 
 .danger {
