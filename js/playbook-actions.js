@@ -119,6 +119,32 @@ function duplicateCurrentPlay() {
   duplicatePlayById();
 }
 
+function duplicateFolderById(folderId = state.activeFolderId) {
+  saveLocal(false);
+  const sourceIndex = state.playbook.folders.findIndex((folder) => folder.id === folderId);
+  const source = state.playbook.folders[sourceIndex];
+  if (!source) return;
+  const duplicate = {
+    id: makeId('folder'),
+    name: `${source.name || 'Folder'} Copy`,
+    plays: (source.plays || []).map((play) => normalizePlay({
+      ...cloneData(play),
+      id: makeId('play')
+    }))
+  };
+  state.playbook.folders.splice(sourceIndex + 1, 0, duplicate);
+  state.activeFolderId = duplicate.id;
+  state.openFolderIds.add(duplicate.id);
+  if (duplicate.plays[0]) {
+    state.activePlayId = duplicate.plays[0].id;
+    applyPlay(duplicate.plays[0]);
+  } else {
+    clearActivePlayView(`${duplicate.name} Empty`);
+  }
+  saveLocal(true);
+  setStatus('Folder Copied');
+}
+
 function totalPlayCount() {
   return state.playbook.folders.reduce((total, folder) => total + folder.plays.length, 0);
 }

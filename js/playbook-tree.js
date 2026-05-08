@@ -333,7 +333,7 @@ function renderMobilePlaybookSelectors() {
   controls.mobilePlaybookList.append(createMobileBookActions());
 
   const previewSection = document.createElement('section');
-  previewSection.className = 'mobile-book-section';
+  previewSection.className = 'mobile-book-section mobile-book-plays-section';
   const previewTitle = document.createElement('div');
   previewTitle.className = 'mobile-book-section-title';
   previewTitle.textContent = 'Plays';
@@ -387,7 +387,7 @@ function renderMobilePlaybookSelectors() {
   controls.mobilePlaybookList.append(previewSection);
 
   const treeSection = document.createElement('section');
-  treeSection.className = 'mobile-book-section';
+  treeSection.className = 'mobile-book-section mobile-book-tree-section';
   const treeTitle = document.createElement('div');
   treeTitle.className = 'mobile-book-section-title';
   treeTitle.textContent = 'Tree';
@@ -414,8 +414,8 @@ function renderMobilePlaybookSelectors() {
     const folderActions = document.createElement('div');
     folderActions.className = 'mobile-book-inline-actions';
     folderActions.append(
-      mobileBookControl('move-folder', '↑', 'Move folder up', { folderId: folder.id, direction: '-1' }, false, folderIndex === 0),
-      mobileBookControl('move-folder', '↓', 'Move folder down', { folderId: folder.id, direction: '1' }, false, folderIndex === state.playbook.folders.length - 1),
+      mobileBookControl('rename-folder', 'Name', 'Rename folder', { folderId: folder.id }),
+      mobileBookControl('duplicate-folder', 'Copy', 'Copy folder', { folderId: folder.id }),
       mobileBookControl('delete-folder', '×', 'Delete folder', { folderId: folder.id }, true, state.playbook.folders.length <= 1)
     );
 
@@ -449,11 +449,9 @@ function renderMobilePlaybookSelectors() {
 
         const playActions = document.createElement('div');
         playActions.className = 'mobile-book-inline-actions';
-        const upDisabled = playIndex === 0 && folderIndex === 0;
-        const downDisabled = playIndex === folder.plays.length - 1 && folderIndex === state.playbook.folders.length - 1;
         playActions.append(
-          mobileBookControl('move-play', '↑', 'Move play up or to previous folder', { folderId: folder.id, playId: play.id, direction: '-1' }, false, upDisabled),
-          mobileBookControl('move-play', '↓', 'Move play down or to next folder', { folderId: folder.id, playId: play.id, direction: '1' }, false, downDisabled),
+          mobileBookControl('rename-play', 'Name', 'Rename play', { folderId: folder.id, playId: play.id }),
+          mobileBookControl('duplicate-play', 'Copy', 'Copy play', { folderId: folder.id, playId: play.id }),
           mobileBookControl('delete-play', '×', 'Delete play', { folderId: folder.id, playId: play.id }, true, totalPlayCount() <= 1)
         );
 
@@ -503,11 +501,23 @@ function handleMobilePlaybookClick(event) {
   if (mobilePlaybookAction === 'delete-folder') {
     deleteFolderById(folderId);
   }
+  if (mobilePlaybookAction === 'rename-folder') {
+    renameFolderById(folderId);
+  }
+  if (mobilePlaybookAction === 'duplicate-folder') {
+    duplicateFolderById(folderId);
+  }
   if (mobilePlaybookAction === 'move-play') {
     movePlayByStep(folderId, playId, Number(button.dataset.direction));
   }
   if (mobilePlaybookAction === 'delete-play') {
     deletePlayById(folderId, playId);
+  }
+  if (mobilePlaybookAction === 'rename-play') {
+    renamePlayById(folderId, playId);
+  }
+  if (mobilePlaybookAction === 'duplicate-play') {
+    duplicatePlayById(folderId, playId);
   }
   if (mobilePlaybookAction === 'select-play') {
     selectPlay(folderId, playId);
