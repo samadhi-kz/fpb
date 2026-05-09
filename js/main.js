@@ -1109,7 +1109,6 @@ async function startApp() {
   syncFullscreenButtons();
   syncMobileDockPanels();
   syncBookOverviewView();
-  setupSharedBookMessageImport();
   const loadedSharedLink = await loadSharedLinkFromUrl();
   if (!loadedSharedLink) loadInitialState();
   if (isMobileLayout()) {

@@ -18,7 +18,7 @@ Flag Play Board 5vs5 は、フラッグフットボールのオフェンスプ�
 - Clear Lines でルートをまとめてクリア
 - Folder と Play でプレイブックを整理してJSON保存
 - PDFボタンで印刷ダイアログを開き、PDFとして保存
-- Book Link が長い場合は、開く用HTMLファイルまたはURLテキストとして保存・共有
+- Book Link が長い場合は、URLテキストとして保存・共有
 - 共有URLを開いた後もURLは残るため、そのままブックマーク可能
 - JSONでファイル出力
 
