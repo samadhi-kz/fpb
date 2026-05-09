@@ -31,8 +31,6 @@ const PLAY_SHARE_PREFIX_GZIP = 'p1z.';
 const BOOK_SHARE_HASH_KEY = 'book';
 const BOOK_SHARE_PREFIX_RAW = 'b1.';
 const BOOK_SHARE_PREFIX_GZIP = 'b1z.';
-const BOOK_IMPORT_QUERY_KEY = 'fpbImport';
-const BOOK_IMPORT_MESSAGE_TYPE = 'fpb:book-import';
 const LONG_SHARE_URL_WARNING_LENGTH = 4000;
 
 function downloadBlob(blob, filename) {
@@ -408,22 +406,6 @@ function currentPageUrlWithoutHash() {
   return url.toString();
 }
 
-function currentPageImportUrl(nonce) {
-  const url = new URL(currentPageUrlWithoutHash());
-  url.searchParams.set(BOOK_IMPORT_QUERY_KEY, nonce);
-  return url.toString();
-}
-
-function makeBookImportNonce() {
-  if (crypto?.randomUUID) return crypto.randomUUID();
-  const bytes = new Uint8Array(16);
-  if (crypto?.getRandomValues) {
-    crypto.getRandomValues(bytes);
-    return bytesToBase64Url(bytes);
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-}
-
 function shouldUseNativeLinkShare() {
   return Boolean(navigator.share)
     && (isAppleTouchDevice() || navigator.maxTouchPoints > 1 || /Android/i.test(navigator.userAgent));
@@ -468,10 +450,6 @@ function selectShareCopyText(area) {
   area.setSelectionRange(0, area.value.length);
 }
 
-function shareOpenHtmlFileName(title, label) {
-  return `${safeFileBase(title || label || 'book-link', 'book-link')}-open.html`;
-}
-
 function shareUrlTextFileName(title, label) {
   return `${safeFileBase(title || label || 'book-link', 'book-link')}-url.txt`;
 }
@@ -479,216 +457,6 @@ function shareUrlTextFileName(title, label) {
 function downloadShareUrlTextFile(shareUrl, filename) {
   const blob = new Blob([`${shareUrl}\n`], { type: 'text/plain;charset=utf-8' });
   downloadBlob(blob, filename);
-}
-
-function jsonForHtmlScript(value) {
-  return JSON.stringify(String(value))
-    .replace(/</g, '\\u003c')
-    .replace(/>/g, '\\u003e')
-    .replace(/&/g, '\\u0026')
-    .replace(/\u2028/g, '\\u2028')
-    .replace(/\u2029/g, '\\u2029');
-}
-
-function jsonChunksForHtmlScript(value) {
-  const text = String(value);
-  const chunkSize = 1800;
-  const chunks = [];
-  for (let index = 0; index < text.length; index += chunkSize) {
-    chunks.push(jsonForHtmlScript(text.slice(index, index + chunkSize)));
-  }
-  return chunks.join(',\n        ');
-}
-
-function createShareOpenHtml(shareUrl, title, label, options = {}) {
-  const importUrl = options.importUrl || shareUrl;
-  const bookToken = options.bookToken || '';
-  const importNonce = options.importNonce || '';
-  const canImportByMessage = Boolean(bookToken && importNonce && importUrl);
-  const safeUrl = escapeHtml(shareUrl);
-  const safeOpenUrl = escapeHtml(canImportByMessage ? importUrl : shareUrl);
-  const safeTitle = escapeHtml(title || label || 'Flag Play Board');
-  return `<!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${safeTitle}</title>
-    <style>
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        padding: 24px;
-        background: #eef3f8;
-        color: #111827;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      }
-      main {
-        width: min(440px, 100%);
-        display: grid;
-        gap: 14px;
-      }
-      h1 {
-        margin: 0;
-        font-size: 24px;
-        text-align: center;
-      }
-      p {
-        margin: 0;
-        color: #687386;
-        line-height: 1.6;
-        text-align: center;
-      }
-      a {
-        display: inline-block;
-        padding: 12px 16px;
-        border-radius: 8px;
-        background: #0a84ff;
-        color: #fff;
-        font-weight: 800;
-        text-align: center;
-        text-decoration: none;
-      }
-      button {
-        min-height: 44px;
-        border: 1px solid #c8d1dc;
-        border-radius: 8px;
-        background: #fff;
-        color: #111827;
-        font: inherit;
-        font-weight: 800;
-      }
-      textarea {
-        width: 100%;
-        min-height: 96px;
-        resize: vertical;
-        padding: 10px;
-        border: 1px solid #c8d1dc;
-        border-radius: 8px;
-        color: #111827;
-        font: 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <h1>Flag Play Board</h1>
-      <p>Open Bookを押すと、短いURLでアプリを開いてBookデータを読み込みます。</p>
-      <a id="openBookButton" href="${safeOpenUrl}" target="_blank">Open Book</a>
-      <button id="copyBookButton" type="button">Copy Long Link</button>
-      <textarea id="bookUrl" readonly aria-label="Book Link">${safeUrl}</textarea>
-    </main>
-    <script>
-      const fallbackBookUrl = [
-        ${jsonChunksForHtmlScript(shareUrl)}
-      ].join('');
-      const appUrl = [
-        ${jsonChunksForHtmlScript(importUrl)}
-      ].join('');
-      const bookToken = [
-        ${jsonChunksForHtmlScript(bookToken)}
-      ].join('');
-      const importNonce = ${jsonForHtmlScript(importNonce)};
-      const importMessageType = ${jsonForHtmlScript(BOOK_IMPORT_MESSAGE_TYPE)};
-      const openBookButton = document.getElementById('openBookButton');
-      const copyBookButton = document.getElementById('copyBookButton');
-      const bookUrlText = document.getElementById('bookUrl');
-      const appOrigin = new URL(appUrl).origin;
-      const targetOrigin = appOrigin === 'null' ? '*' : appOrigin;
-
-      openBookButton.href = ${canImportByMessage ? 'appUrl' : 'fallbackBookUrl'};
-      bookUrlText.value = fallbackBookUrl;
-
-      function sendBookTo(targetWindow) {
-        if (!bookToken || !importNonce || !targetWindow) return;
-        let attempts = 0;
-        const timer = window.setInterval(() => {
-          attempts += 1;
-          try {
-            targetWindow.postMessage({
-              type: importMessageType,
-              nonce: importNonce,
-              token: bookToken
-            }, targetOrigin);
-          } catch {
-            window.clearInterval(timer);
-          }
-          if (attempts >= 48) window.clearInterval(timer);
-        }, 250);
-      }
-
-      openBookButton.addEventListener('click', (event) => {
-        if (!bookToken || !importNonce) return;
-        event.preventDefault();
-        const targetWindow = window.open(appUrl, '_blank');
-        if (!targetWindow) {
-          copyBookButton.textContent = 'Pop-up Blocked';
-          return;
-        }
-        sendBookTo(targetWindow);
-      });
-
-      copyBookButton.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(fallbackBookUrl);
-          copyBookButton.textContent = 'Copied';
-        } catch {
-          bookUrlText.focus();
-          bookUrlText.select();
-          document.execCommand('copy');
-          copyBookButton.textContent = 'Selected';
-        }
-      });
-
-      const isTouchDevice = navigator.maxTouchPoints > 0 || /Android|iPad|iPhone|iPod/i.test(navigator.userAgent);
-      if (isTouchDevice && !bookToken) {
-        window.setTimeout(() => {
-          window.location.href = fallbackBookUrl;
-        }, 450);
-      }
-    </script>
-  </body>
-</html>
-`;
-}
-
-async function saveShareOpenHtml(shareUrl, title, label, filename, options = {}) {
-  const html = createShareOpenHtml(shareUrl, title, label, options);
-  const htmlFileName = filename || shareOpenHtmlFileName(title, label);
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-
-  if (typeof File === 'function' && navigator.canShare && navigator.share) {
-    const file = new File([blob], htmlFileName, { type: 'text/html' });
-    let canShareFile = false;
-    try {
-      canShareFile = navigator.canShare({ files: [file] });
-    } catch (error) {
-      console.warn('HTML file sharing is not available.', error);
-    }
-    if (canShareFile) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: title || label || 'Flag Play Board',
-          text: 'Flag Play Board Book Link'
-        });
-        setStatus(`${label} HTML Shared (${shareUrl.length})`);
-        return true;
-      } catch (error) {
-        if (error?.name === 'AbortError') {
-          setStatus('Cancelled');
-          return false;
-        }
-        console.warn('Native HTML share failed; downloading file.', error);
-      }
-    }
-  }
-
-  downloadBlob(blob, htmlFileName);
-  setStatus(`${label} HTML Saved (${shareUrl.length})`);
-  return true;
 }
 
 function showManualShareLink(label, shareUrl, options = {}) {
@@ -710,7 +478,7 @@ function showManualShareLink(label, shareUrl, options = {}) {
 
   const hint = document.createElement('p');
   hint.textContent = options.longWarning
-    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Save HTMLで開く用ファイル、Save TXTでURLテキストを保存できます。'
+    ? 'URLが長いため、LINEやメールで途中で切れる場合があります。Save TXTでURLテキストを保存できます。'
     : 'リンク欄は全選択されています。Copyボタン、または Command+C / Ctrl+C でコピーできます。';
 
   const area = document.createElement('textarea');
@@ -732,11 +500,6 @@ function showManualShareLink(label, shareUrl, options = {}) {
   copyButton.type = 'button';
   copyButton.textContent = 'Copy';
 
-  const saveHtmlButton = document.createElement('button');
-  saveHtmlButton.className = 'wide-button';
-  saveHtmlButton.type = 'button';
-  saveHtmlButton.textContent = 'Save HTML';
-
   const saveTextButton = document.createElement('button');
   saveTextButton.className = 'wide-button';
   saveTextButton.type = 'button';
@@ -745,23 +508,6 @@ function showManualShareLink(label, shareUrl, options = {}) {
   const close = () => overlay.remove();
 
   closeButton.addEventListener('click', close);
-  saveHtmlButton.addEventListener('click', async () => {
-    saveHtmlButton.disabled = true;
-    saveHtmlButton.textContent = 'Saving...';
-    const saved = await saveShareOpenHtml(
-      shareUrl,
-      options.title,
-      label,
-      options.htmlFileName || shareOpenHtmlFileName(options.title, label),
-      options
-    );
-    if (saved) {
-      close();
-      return;
-    }
-    saveHtmlButton.disabled = false;
-    saveHtmlButton.textContent = 'Save HTML';
-  });
   saveTextButton.addEventListener('click', () => {
     downloadShareUrlTextFile(shareUrl, options.textFileName || shareUrlTextFileName(options.title, label));
     setStatus(`${label} TXT Saved (${shareUrl.length})`);
@@ -786,7 +532,6 @@ function showManualShareLink(label, shareUrl, options = {}) {
   });
 
   actions.append(closeButton);
-  if (options.includeHtmlDownload) actions.append(saveHtmlButton);
   if (options.includeTextDownload) actions.append(saveTextButton);
   actions.append(copyButton);
   dialog.append(title, hint, area, actions);
@@ -799,13 +544,8 @@ async function deliverShareUrl(shareUrl, title, label, options = {}) {
   const shouldCopyAfterWarning = options.warnIfLong && shareUrl.length >= LONG_SHARE_URL_WARNING_LENGTH;
   if (shouldCopyAfterWarning) {
     showManualShareLink(label, shareUrl, {
-      includeHtmlDownload: true,
       longWarning: true,
-      htmlFileName: shareOpenHtmlFileName(title, label),
       includeTextDownload: true,
-      importNonce: options.importNonce,
-      importUrl: options.importUrl,
-      bookToken: options.bookToken,
       textFileName: shareUrlTextFileName(title, label),
       title
     });
@@ -862,15 +602,8 @@ async function shareCurrentBookLink() {
     const playbook = playbookForBookLink(fileName);
     const token = await encodeBookSharePayload(playbook);
     const shareUrl = `${currentPageUrlWithoutHash()}#${BOOK_SHARE_HASH_KEY}=${token}`;
-    const importNonce = makeBookImportNonce();
-    const importUrl = currentPageImportUrl(importNonce);
     const bookName = fileName.replace(/\.json$/i, '') || activeFolder()?.name || 'Flag Play Board';
-    await deliverShareUrl(shareUrl, bookName, 'Book Link', {
-      warnIfLong: true,
-      importNonce,
-      importUrl,
-      bookToken: token
-    });
+    await deliverShareUrl(shareUrl, bookName, 'Book Link', { warnIfLong: true });
   } catch (error) {
     console.error(error);
     alert('Book Linkを作成できませんでした。Bookが大きい場合はJSON保存を使ってください。');
@@ -890,10 +623,6 @@ function sharedPlayTokenFromLocation() {
 
 function sharedBookTokenFromLocation() {
   return sharedTokenFromLocation(BOOK_SHARE_HASH_KEY);
-}
-
-function sharedBookImportNonceFromLocation() {
-  return new URL(window.location.href).searchParams.get(BOOK_IMPORT_QUERY_KEY) || '';
 }
 
 function applySharedBookPayload(sharedPayload, statusText = 'Shared Book Loaded') {
@@ -920,36 +649,6 @@ function applySharedBookPayload(sharedPayload, statusText = 'Shared Book Loaded'
 async function loadSharedBookToken(token, statusText = 'Shared Book Loaded') {
   const sharedPayload = await decodeBookSharePayload(token);
   return applySharedBookPayload(sharedPayload, statusText);
-}
-
-let sharedBookMessageLoaded = false;
-
-function setupSharedBookMessageImport() {
-  const expectedNonce = sharedBookImportNonceFromLocation();
-  if (!expectedNonce) return;
-
-  window.addEventListener('message', async (event) => {
-    const data = event.data;
-    if (
-      sharedBookMessageLoaded
-      || !data
-      || data.type !== BOOK_IMPORT_MESSAGE_TYPE
-      || data.nonce !== expectedNonce
-      || typeof data.token !== 'string'
-    ) {
-      return;
-    }
-
-    sharedBookMessageLoaded = true;
-    try {
-      await loadSharedBookToken(data.token, 'Shared Book File Loaded');
-    } catch (error) {
-      sharedBookMessageLoaded = false;
-      console.error(error);
-      alert('Book HTMLを読み込めませんでした。ファイルを作り直してください。');
-      setStatus('Book HTML Load Failed');
-    }
-  });
 }
 
 async function loadSharedPlayFromUrl() {
